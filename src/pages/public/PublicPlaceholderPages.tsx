@@ -6,10 +6,6 @@ export function ProviderProfilePage() {
   return <PageShell description={`Hồ sơ, dịch vụ và khả dụng của đối tác ${id ?? ''} sẽ được ghép từ feature profiles và availability.`} title="Hồ sơ đối tác" />
 }
 
-export function SignInPage() {
-  return <PageShell description="Điểm tích hợp cơ chế đăng nhập phù hợp với backend; không lưu token dài hạn trong localStorage." title="Đăng nhập" />
-}
-
 export function PartnerRegistrationPage() {
   return <PageShell description="Form sẽ phân nhánh KYC freelancer và hồ sơ công ty theo hợp đồng API." title="Trở thành đối tác" />
 }

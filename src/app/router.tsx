@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { RequireActor } from './guards/RequireActor'
 import { RouteErrorBoundary } from './errors/RouteErrorBoundary'
 import { AdminLayout } from './layouts/AdminLayout'
@@ -15,15 +15,21 @@ import {
 } from '../pages/partner/PartnerPages'
 import { DiscoveryPage } from '../pages/public/DiscoveryPage'
 import { HomePage } from '../pages/public/HomePage'
+import { OtpVerificationPage, SignInPage, SignUpPage } from '../pages/public/AuthPages'
 import {
   ForbiddenPage,
   NotFoundPage,
   PartnerRegistrationPage,
   ProviderProfilePage,
-  SignInPage,
 } from '../pages/public/PublicPlaceholderPages'
 
 export const router = createBrowserRouter([
+  { path: 'login', element: <SignInPage />, errorElement: <RouteErrorBoundary /> },
+  { path: 'register', element: <SignUpPage />, errorElement: <RouteErrorBoundary /> },
+  { path: 'verify-otp', element: <OtpVerificationPage />, errorElement: <RouteErrorBoundary /> },
+  { path: 'dang-nhap', element: <Navigate replace to="/login" /> },
+  { path: 'dang-ky', element: <Navigate replace to="/register" /> },
+  { path: 'xac-thuc-otp', element: <Navigate replace to="/verify-otp" /> },
   {
     element: <PublicLayout />,
     errorElement: <RouteErrorBoundary />,
@@ -31,7 +37,6 @@ export const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: 'doi-tac', element: <DiscoveryPage /> },
       { path: 'doi-tac/:id', element: <ProviderProfilePage /> },
-      { path: 'dang-nhap', element: <SignInPage /> },
       { path: 'dang-ky-doi-tac', element: <PartnerRegistrationPage /> },
       { path: 'khong-co-quyen', element: <ForbiddenPage /> },
     ],

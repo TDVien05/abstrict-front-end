@@ -12,7 +12,7 @@ export function RequireActor({ allow, children }: RequireActorProps) {
   const location = useLocation()
 
   if (!isAuthenticated) {
-    return <Navigate replace state={{ from: location }} to="/dang-nhap" />
+    return <Navigate replace state={{ from: location }} to="/login" />
   }
 
   if (!hasActor(allow)) {
