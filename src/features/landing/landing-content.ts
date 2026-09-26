@@ -66,6 +66,33 @@ export const partners = [
   },
 ] as const
 
+export const bookingModes = [
+  {
+    id: 'tasks',
+    label: 'Theo đầu việc',
+    shortDescription: 'Chọn chính xác những hạng mục bạn muốn hoàn thành.',
+    title: 'Bạn kiểm soát rõ từng việc cần làm',
+    description: 'Phù hợp khi đã biết khu vực hoặc công việc cần ưu tiên trong lần đặt này.',
+    highlights: ['Tự chọn hạng mục', 'Thêm ghi chú riêng', 'Theo dõi bằng checklist'],
+  },
+  {
+    id: 'time',
+    label: 'Theo thời lượng',
+    shortDescription: 'Chọn khoảng thời gian, đối tác hỗ trợ sắp xếp công việc.',
+    title: 'Linh hoạt theo quỹ thời gian của bạn',
+    description: 'Phù hợp khi bạn muốn đặt một ca hỗ trợ và thống nhất thứ tự ưu tiên cùng đối tác.',
+    highlights: ['Chủ động khung giờ', 'Trao đổi ưu tiên', 'Xác nhận trước khi bắt đầu'],
+  },
+  {
+    id: 'recurring',
+    label: 'Theo lịch định kỳ',
+    shortDescription: 'Duy trì không gian đều đặn theo lịch phù hợp.',
+    title: 'Tạo nhịp chăm sóc ổn định lâu dài',
+    description: 'Phù hợp với nhu cầu lặp lại theo tuần hoặc theo lịch riêng của gia đình.',
+    highlights: ['Chọn lịch lặp lại', 'Ưu tiên đối tác quen', 'Điều chỉnh khi cần'],
+  },
+] as const
+
 export const bookingSteps = [
   {
     number: '01',
@@ -97,6 +124,13 @@ export const workflowSteps = [
     title: 'Nghiệm thu & hoàn tất',
     description: 'Khách kiểm tra căn hộ thực tế, hài lòng và xác nhận hoàn tất ca dọn trực tiếp.',
   },
+] as const
+
+export const workflowChecklist = [
+  { id: 'floor', title: 'Hút bụi và lau sàn', detail: 'Phòng khách, phòng ngủ và lối đi' },
+  { id: 'bathroom', title: 'Vệ sinh khu vực phòng tắm', detail: 'Lavabo, gương và khu vực tắm' },
+  { id: 'kitchen', title: 'Làm sạch bề mặt bếp', detail: 'Mặt bếp, bồn rửa và khu vực nấu' },
+  { id: 'handover', title: 'Chụp ảnh và bàn giao', detail: 'Cập nhật bằng chứng hoàn thành ca' },
 ] as const
 
 export const trustPillars = [

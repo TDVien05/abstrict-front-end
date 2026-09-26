@@ -47,10 +47,10 @@ export function AppTopbar({ actor = 'public' }: AppTopbarProps) {
             ))}
           </nav>
           <div className="flex items-center gap-2 sm:gap-4">
-            <NavLink className="px-2 py-2 text-[15px] font-semibold text-brand-charcoal transition-opacity hover:opacity-70 sm:px-3" to="/dang-nhap">
+            <NavLink className="hidden px-2 py-2 text-[15px] font-semibold text-brand-charcoal transition-opacity hover:opacity-70 sm:block sm:px-3" to="/dang-nhap">
               Đăng nhập
             </NavLink>
-            <a className="inline-flex items-center justify-center rounded-xl bg-brand-charcoal px-4 py-2.5 text-[15px] font-semibold text-white shadow-sm transition-colors hover:bg-black sm:px-5" href="/#hero-search">
+            <a className="inline-flex items-center justify-center rounded-xl bg-brand-charcoal px-3 py-2.5 text-[15px] font-semibold text-white shadow-sm transition-colors hover:bg-black sm:px-5" href="/#hero-search">
               Đặt lịch ngay
             </a>
           </div>

@@ -3,11 +3,16 @@ import {
   BadgeCheck,
   BrushCleaning,
   CalendarCheck2,
+  Camera,
   Check,
+  CheckCircle2,
   ChevronDown,
   ClipboardCheck,
+  Clock3,
   Headset,
+  ListChecks,
   MapPin,
+  ShieldCheck,
   Shirt,
   SprayCan,
 } from 'lucide-react'
@@ -17,11 +22,13 @@ import cleanerImage from '../assets/landing-page-cleaner.png'
 import { BrandLogo } from '../../../shared/ui/BrandLogo'
 import { Reveal } from '../../../shared/ui/Reveal'
 import {
+  bookingModes,
   bookingSteps,
   faqs,
   partners,
   services,
   trustPillars,
+  workflowChecklist,
   workflowSteps,
 } from '../landing-content'
 
@@ -63,11 +70,11 @@ function SearchSelect({ defaultValue, label, name, options }: SearchSelectProps)
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <label className="flex flex-col text-left text-sm font-semibold text-brand-charcoal">
+    <label className="flex min-w-0 flex-col text-left text-sm font-semibold text-brand-charcoal">
       <span className="mb-2">{label}</span>
       <span className="relative">
         <select
-          className="w-full appearance-none rounded-xl border border-brand-border bg-brand-sand/50 py-2.5 pl-3 pr-11 text-sm font-normal normal-case tracking-normal text-brand-charcoal focus:border-brand-purple focus:outline-none focus:ring-1 focus:ring-brand-purple"
+          className="w-full min-w-0 appearance-none rounded-xl border border-brand-border bg-brand-sand/50 py-2.5 pl-3 pr-11 text-sm font-normal normal-case tracking-normal text-brand-charcoal focus:border-brand-blue-pastel-hover focus:outline-none focus:ring-1 focus:ring-brand-blue-pastel"
           defaultValue={defaultValue}
           name={name}
           onBlur={() => setIsOpen(false)}
@@ -109,7 +116,7 @@ export function HeroSection() {
   return (
     <section className="pb-20 pt-14 sm:pt-20 lg:py-28">
       <Reveal className={`${containerClass} grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8`}>
-        <div className="flex flex-col items-start lg:col-span-7 lg:pr-6">
+        <div className="flex min-w-0 flex-col items-start lg:col-span-7 lg:pr-6">
           <div className="mb-7 inline-flex items-center gap-2 text-sm font-semibold text-brand-muted">
             <span className="h-2 w-2 rounded-full bg-brand-green" />
             Nền tảng đặt giúp việc căn hộ uy tín
@@ -120,8 +127,8 @@ export function HeroSection() {
           <p className="page-intro mb-10 max-w-xl">
             Chọn người giúp việc hoặc công ty phù hợp, xem lịch và đặt ca theo giờ bạn muốn.
           </p>
-          <div className={`mb-6 w-full rounded-2xl border border-brand-border bg-white p-4 sm:p-5 ${softShadow}`} id="hero-search">
-            <form className="grid grid-cols-1 gap-3.5 sm:grid-cols-3" onSubmit={handleSearch}>
+          <div className={`mb-6 min-w-0 w-full rounded-2xl border border-brand-border bg-white p-4 sm:p-5 ${softShadow}`} id="hero-search">
+            <form className="grid min-w-0 grid-cols-1 gap-3.5 sm:grid-cols-3" onSubmit={handleSearch}>
               <SearchSelect
                 defaultValue="quan-1"
                 label="Khu vực"
@@ -134,9 +141,9 @@ export function HeroSection() {
                   { label: 'Quận 7, Phú Mỹ Hưng', value: 'quan-7' },
                 ]}
               />
-              <label className="flex flex-col text-left text-sm font-semibold text-brand-charcoal">
+              <label className="flex min-w-0 flex-col text-left text-sm font-semibold text-brand-charcoal">
                 <span className="mb-2">Ngày cần làm</span>
-                <input className="w-full rounded-xl border border-brand-border bg-brand-sand/50 px-3 py-2.5 text-sm font-normal normal-case tracking-normal text-brand-charcoal focus:border-brand-purple focus:outline-none focus:ring-1 focus:ring-brand-purple" defaultValue="2026-10-28" name="date" type="date" />
+                <input className="w-full min-w-0 rounded-xl border border-brand-border bg-brand-sand/50 px-3 py-2.5 text-sm font-normal normal-case tracking-normal text-brand-charcoal focus:border-brand-blue-pastel-hover focus:outline-none focus:ring-1 focus:ring-brand-blue-pastel" defaultValue="2026-10-28" name="date" type="date" />
               </label>
               <SearchSelect
                 defaultValue="don-dep-tieu-chuan"
@@ -151,7 +158,7 @@ export function HeroSection() {
               />
               <div className="flex flex-wrap items-center justify-between gap-4 pt-2 sm:col-span-3">
                 <a className="text-sm font-medium text-brand-muted transition-colors hover:text-brand-charcoal" href="#how-it-works">Xem cách hoạt động →</a>
-                <button className="inline-flex w-full items-center justify-center rounded-xl bg-brand-purple px-7 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-purple-hover sm:w-auto" type="submit">Tìm đối tác</button>
+                <button className="inline-flex w-full items-center justify-center rounded-xl bg-brand-blue-pastel px-7 py-3 text-sm font-semibold text-brand-charcoal shadow-sm transition-colors hover:bg-brand-blue-pastel-hover sm:w-auto" type="submit">Tìm đối tác</button>
               </div>
             </form>
           </div>
@@ -190,7 +197,7 @@ export function ServicesSection() {
                 <h3 className="mb-3 text-xl font-semibold text-brand-charcoal">{service.title}</h3>
                 <p className="mb-7 text-base leading-relaxed text-brand-muted">{service.description}</p>
               </div>
-              <a className="flex items-center gap-1.5 text-sm font-semibold text-brand-charcoal transition-colors group-hover:text-brand-purple" href="#partners">Khám phá <span aria-hidden="true">→</span></a>
+              <a className="flex items-center gap-1.5 text-sm font-semibold text-brand-charcoal transition-colors group-hover:text-brand-blue-ink" href="#partners">Khám phá <span aria-hidden="true">→</span></a>
             </article>
           ))}
         </div>
@@ -207,7 +214,7 @@ export function PartnerSection() {
           <h2 className="section-title mx-auto mb-5">Tìm người làm phù hợp với lịch của bạn</h2>
           <p className="section-intro mx-auto">Freelancer đã xác thực lịch rảnh hoặc công ty chuyên nghiệp hỗ trợ theo yêu cầu.</p>
           <div className="mt-6">
-            <Link className="inline-flex items-center gap-1 text-sm font-semibold text-brand-purple transition-colors hover:text-brand-purple-hover" to="/doi-tac">Xem tất cả đối tác →</Link>
+            <Link className="inline-flex items-center gap-1 text-sm font-semibold text-brand-blue-ink transition-colors hover:text-brand-charcoal" to="/doi-tac">Xem tất cả đối tác →</Link>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -246,6 +253,76 @@ export function PartnerSection() {
   )
 }
 
+function BookingModeIcon({ mode }: { mode: (typeof bookingModes)[number]['id'] }) {
+  const className = 'h-5 w-5'
+
+  if (mode === 'tasks') return <ListChecks aria-hidden="true" className={className} strokeWidth={1.8} />
+  if (mode === 'time') return <Clock3 aria-hidden="true" className={className} strokeWidth={1.8} />
+  return <CalendarCheck2 aria-hidden="true" className={className} strokeWidth={1.8} />
+}
+
+export function BookingModeSection() {
+  const [selectedModeId, setSelectedModeId] = useState<(typeof bookingModes)[number]['id']>('tasks')
+  const selectedMode = bookingModes.find((mode) => mode.id === selectedModeId) ?? bookingModes[0]
+
+  return (
+    <section className="content-section bg-white" id="booking-options">
+      <Reveal className={containerClass}>
+        <div className="mx-auto mb-14 max-w-3xl text-center">
+          <h2 className="section-title mx-auto mb-5">Đặt dịch vụ theo cách phù hợp với bạn</h2>
+          <p className="section-intro mx-auto">Bắt đầu từ công việc, quỹ thời gian hoặc lịch sinh hoạt — không bị giới hạn bởi loại hình nơi ở.</p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <div aria-label="Cách đặt dịch vụ" className="space-y-3 lg:col-span-5" role="tablist">
+            {bookingModes.map((mode) => {
+              const selected = mode.id === selectedModeId
+              return (
+                <button
+                  aria-controls="booking-mode-panel"
+                  aria-selected={selected}
+                  className={`flex w-full items-start gap-4 rounded-2xl border p-5 text-left transition-all ${selected ? `border-brand-blue-pastel-hover bg-brand-blue-pastel text-brand-charcoal ${softShadow}` : 'border-brand-border bg-brand-sand hover:border-brand-blue-pastel-hover hover:bg-brand-blue-pastel-soft'}`}
+                  id={`booking-mode-${mode.id}`}
+                  key={mode.id}
+                  onClick={() => setSelectedModeId(mode.id)}
+                  role="tab"
+                  type="button"
+                >
+                  <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${selected ? 'bg-white/55 text-brand-blue-ink' : 'bg-white text-brand-blue-ink'}`}><BookingModeIcon mode={mode.id} /></span>
+                  <span><span className="block text-base font-semibold text-brand-charcoal">{mode.label}</span><span className={`mt-1 block text-sm leading-relaxed ${selected ? 'text-brand-blue-ink' : 'text-brand-muted'}`}>{mode.shortDescription}</span></span>
+                </button>
+              )
+            })}
+          </div>
+
+          <div
+            aria-labelledby={`booking-mode-${selectedMode.id}`}
+            className={`flex min-h-[360px] flex-col justify-between overflow-hidden rounded-3xl bg-brand-charcoal p-7 text-white sm:p-10 lg:col-span-7 ${softShadow}`}
+            id="booking-mode-panel"
+            role="tabpanel"
+          >
+            <div>
+              <span className="mb-7 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white"><BookingModeIcon mode={selectedMode.id} /></span>
+              <p className="mb-3 text-sm font-semibold text-brand-green">{selectedMode.label}</p>
+              <h3 className="mb-4 max-w-xl text-3xl font-semibold leading-tight tracking-[-0.025em] text-white">{selectedMode.title}</h3>
+              <p className="max-w-2xl text-base leading-relaxed text-white/65">{selectedMode.description}</p>
+              <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {selectedMode.highlights.map((highlight) => (
+                  <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/90" key={highlight}><CheckCircle2 aria-hidden="true" className="h-4 w-4 shrink-0 text-brand-green" />{highlight}</div>
+                ))}
+              </div>
+            </div>
+            <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-white/55">Chi tiết công việc và báo giá được xác nhận trước khi đặt.</p>
+              <a className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-brand-charcoal transition-colors hover:bg-brand-sand" href="#hero-search">Bắt đầu tìm đối tác <span aria-hidden="true" className="ml-2">→</span></a>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+    </section>
+  )
+}
+
 export function HowItWorksSection() {
   return (
     <section className="content-section bg-white" id="how-it-works">
@@ -269,30 +346,90 @@ export function HowItWorksSection() {
 }
 
 export function TransparentWorkflowSection() {
+  const [completedItems, setCompletedItems] = useState<string[]>(workflowChecklist.slice(0, 3).map((item) => item.id))
+  const progress = Math.round((completedItems.length / workflowChecklist.length) * 100)
+
+  function toggleChecklistItem(itemId: string) {
+    setCompletedItems((current) =>
+      current.includes(itemId) ? current.filter((id) => id !== itemId) : [...current, itemId],
+    )
+  }
+
   return (
     <section className="content-section">
       <Reveal className={containerClass}>
-        <div className={`grid grid-cols-1 overflow-hidden rounded-3xl border border-brand-border bg-white lg:grid-cols-12 ${softShadow}`}>
-          <div className="relative lg:col-span-6">
-            <img alt="Căn hộ hiện đại sạch sẽ với ánh nắng ấm và cây xanh" className="h-full min-h-[380px] w-full object-cover lg:min-h-[500px]" decoding="async" loading="lazy" src={apartmentImage} />
-          </div>
-          <div className="flex flex-col justify-center p-8 sm:p-12 lg:col-span-6">
-            <div className="mb-8">
-              <span className="mb-4 block text-base font-semibold text-brand-purple">Minh bạch & rõ ràng</span>
-              <h2 className="section-title">Quy trình thực hiện ca dọn chuẩn mực</h2>
+        <div className="mx-auto mb-14 max-w-3xl text-center">
+          <div className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-purple"><Camera aria-hidden="true" className="h-4 w-4" />Theo dõi ca dọn</div>
+          <h2 className="section-title mx-auto mb-5">Mỗi đầu việc đều có tiến độ rõ ràng</h2>
+          <p className="section-intro mx-auto">Thử tích chọn checklist để xem cách khách hàng theo dõi và nghiệm thu một ca dọn trên ABSTRICT.</p>
+        </div>
+        <div className={`grid grid-cols-1 gap-8 rounded-3xl border border-brand-border bg-white p-6 lg:grid-cols-12 lg:p-8 ${softShadow}`}>
+          <div className="relative overflow-hidden rounded-2xl lg:col-span-7">
+            <img alt="Căn hộ hiện đại sạch sẽ với ánh nắng ấm và cây xanh" className="h-full min-h-[420px] w-full object-cover" decoding="async" loading="lazy" src={apartmentImage} />
+            <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-brand-charcoal/85 px-3 py-2 text-xs font-semibold text-white backdrop-blur-sm">
+              <span className="h-2 w-2 rounded-full bg-brand-green" />Ảnh bàn giao sau ca
             </div>
-            <div className="space-y-7">
-              {workflowSteps.map((step, index) => (
-                <div className="flex gap-4" key={step.title}>
-                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand-border bg-brand-sand text-sm font-bold text-brand-charcoal">{index + 1}</div>
-                  <div><h3 className="mb-2 text-lg font-semibold text-brand-charcoal">{step.title}</h3><p className="text-base leading-relaxed text-brand-muted">{step.description}</p></div>
-                </div>
-              ))}
+            <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/50 bg-white/90 p-4 backdrop-blur-sm sm:inset-x-6 sm:bottom-6">
+              <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                <div><p className="text-sm font-semibold text-brand-charcoal">Căn hộ 2 phòng ngủ</p><p className="text-xs text-brand-muted">Ảnh được lưu cùng checklist của ca dọn</p></div>
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-green"><CheckCircle2 aria-hidden="true" className="h-4 w-4" />Đã ghi nhận</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col justify-between lg:col-span-5">
+            <div>
+              <div className="mb-6">
+                <span className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-brand-purple"><ListChecks aria-hidden="true" className="h-4 w-4" />Checklist minh họa</span>
+                <h3 className="text-2xl font-semibold text-brand-charcoal">Tiến độ thực hiện ca dọn</h3>
+              </div>
+              <div className="space-y-3">
+                {workflowChecklist.map((item) => {
+                  const completed = completedItems.includes(item.id)
+                  return (
+                    <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-brand-border bg-brand-sand p-4 transition-colors hover:border-brand-blue-pastel-hover" key={item.id}>
+                      <input checked={completed} className="mt-1 h-4 w-4 accent-brand-blue-pastel-hover" onChange={() => toggleChecklistItem(item.id)} type="checkbox" />
+                      <span className="flex-1"><span className="block text-sm font-semibold text-brand-charcoal">{item.title}</span><span className="mt-1 block text-xs leading-relaxed text-brand-muted">{item.detail}</span></span>
+                      <span className={`text-xs font-semibold ${completed ? 'text-brand-green' : 'text-brand-muted'}`}>{completed ? 'Hoàn tất' : 'Đang chờ'}</span>
+                    </label>
+                  )
+                })}
+              </div>
+            </div>
+            <div className="mt-6 rounded-2xl border border-brand-border bg-brand-sand p-5">
+              <div className="mb-3 flex items-center justify-between text-sm"><span className="font-semibold text-brand-charcoal">Tiến độ hoàn tất</span><strong className="text-brand-blue-ink">{progress}%</strong></div>
+              <div aria-label={`Tiến độ ${progress}%`} aria-valuemax={100} aria-valuemin={0} aria-valuenow={progress} className="h-2.5 overflow-hidden rounded-full bg-brand-border" role="progressbar"><div className="h-full rounded-full bg-brand-blue-pastel-hover transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${progress}%` }} /></div>
+              <p className="mt-3 text-xs leading-relaxed text-brand-muted">Khách hàng đối chiếu checklist và ảnh bàn giao trước khi xác nhận hoàn tất.</p>
             </div>
           </div>
         </div>
+        <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+          {workflowSteps.map((step, index) => (
+            <div className="flex gap-4 rounded-2xl bg-white p-5" key={step.title}>
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-sand text-sm font-semibold text-brand-purple">{index + 1}</div>
+              <div><h3 className="mb-1 text-base font-semibold text-brand-charcoal">{step.title}</h3><p className="text-sm leading-relaxed text-brand-muted">{step.description}</p></div>
+            </div>
+          ))}
+        </div>
       </Reveal>
     </section>
+  )
+}
+
+function TrustCommitmentBanner() {
+  return (
+    <div className={`mb-16 rounded-3xl border border-brand-border bg-brand-sand p-6 sm:p-8 ${softShadow}`}>
+      <div className="flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex max-w-xl items-start gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand-purple text-white"><ShieldCheck aria-hidden="true" className="h-7 w-7" strokeWidth={1.8} /></div>
+          <div><h3 className="text-xl font-semibold text-brand-charcoal">An tâm trong từng bước đặt và nghiệm thu</h3><p className="mt-2 text-sm leading-relaxed text-brand-muted">Thông tin đối tác, chi phí, checklist và kênh hỗ trợ được hiển thị rõ để bạn chủ động quyết định.</p></div>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {['Xét duyệt hồ sơ', 'Giá xác nhận trước', 'Có bằng chứng ca dọn'].map((label) => (
+            <div className="flex items-center gap-2 rounded-xl border border-brand-border bg-white px-4 py-3 text-sm font-semibold text-brand-charcoal" key={label}><CheckCircle2 aria-hidden="true" className="h-4 w-4 shrink-0 text-brand-green" />{label}</div>
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -300,6 +437,7 @@ export function TrustAndFaqSection() {
   return (
     <section className="content-section bg-white" id="trust-and-faq">
       <Reveal className={containerClass}>
+        <TrustCommitmentBanner />
         <div className="mb-20 grid grid-cols-1 gap-8 md:grid-cols-3">
           {trustPillars.map((pillar) => (
             <article className="rounded-2xl bg-brand-sand p-7" key={pillar.title}>

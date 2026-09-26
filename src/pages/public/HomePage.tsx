@@ -1,4 +1,5 @@
 import {
+  BookingModeSection,
   HeroSection,
   HowItWorksSection,
   LandingCallToAction,
@@ -16,6 +17,7 @@ export function HomePage() {
         <HeroSection />
         <ServicesSection />
         <PartnerSection />
+        <BookingModeSection />
         <HowItWorksSection />
         <TransparentWorkflowSection />
         <TrustAndFaqSection />
