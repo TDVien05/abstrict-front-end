@@ -1,4 +1,5 @@
 import { ApiError, type ApiProblemDetails } from './problem-details'
+import { getAccessToken } from './access-token'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api/v1'
 
@@ -9,6 +10,10 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const headers = new Headers(options.headers)
   headers.set('Accept', 'application/json')
+  const accessToken = getAccessToken()
+  if (accessToken) {
+    headers.set('Authorization', `Bearer ${accessToken}`)
+  }
 
   if (options.body !== undefined) {
     headers.set('Content-Type', 'application/json')

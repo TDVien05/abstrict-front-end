@@ -130,3 +130,30 @@ select,
 textarea {
   font: inherit;
 }
+
+.route-transition {
+  animation: route-enter 280ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+button:not(:disabled):active,
+a[href]:active {
+  filter: brightness(0.96);
+}
+
+@keyframes route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-transition {
+    animation: none;
+  }
+}
