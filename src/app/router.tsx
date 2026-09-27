@@ -5,8 +5,9 @@ import { AdminLayout } from './layouts/AdminLayout'
 import { AppLayout } from './layouts/AppLayout'
 import { PartnerLayout } from './layouts/PartnerLayout'
 import { PublicLayout } from './layouts/PublicLayout'
+import { RouteTransition } from '../shared/ui/RouteTransition'
 import { AdminApprovalsPage, AdminDisputesPage } from '../pages/admin/AdminPages'
-import { BookingCreatePage, OrderDetailPage, OrdersPage } from '../pages/customer/CustomerPages'
+import { BookingCreatePage, CustomerDiscoveryPage, CustomerProviderPage, OrderDetailPage, OrdersPage } from '../pages/customer/CustomerPages'
 import {
   PartnerAvailabilityPage,
   PartnerDashboardPage,
@@ -24,9 +25,9 @@ import {
 } from '../pages/public/PublicPlaceholderPages'
 
 export const router = createBrowserRouter([
-  { path: 'login', element: <SignInPage />, errorElement: <RouteErrorBoundary /> },
-  { path: 'register', element: <SignUpPage />, errorElement: <RouteErrorBoundary /> },
-  { path: 'verify-otp', element: <OtpVerificationPage />, errorElement: <RouteErrorBoundary /> },
+  { path: 'login', element: <RouteTransition><SignInPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
+  { path: 'register', element: <RouteTransition><SignUpPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
+  { path: 'verify-otp', element: <RouteTransition><OtpVerificationPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
   { path: 'dang-nhap', element: <Navigate replace to="/login" /> },
   { path: 'dang-ky', element: <Navigate replace to="/register" /> },
   { path: 'xac-thuc-otp', element: <Navigate replace to="/verify-otp" /> },
@@ -49,6 +50,8 @@ export const router = createBrowserRouter([
     ),
     errorElement: <RouteErrorBoundary />,
     children: [
+      { path: 'kham-pha', element: <CustomerDiscoveryPage /> },
+      { path: 'kham-pha/:providerId', element: <CustomerProviderPage /> },
       { path: 'dat-lich/:providerId', element: <BookingCreatePage /> },
       { path: 'don-hang', element: <OrdersPage /> },
       { path: 'don-hang/:id', element: <OrderDetailPage /> },
@@ -89,7 +92,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: <NotFoundPage />,
+    element: <RouteTransition><NotFoundPage /></RouteTransition>,
     errorElement: <RouteErrorBoundary />,
   },
 ])

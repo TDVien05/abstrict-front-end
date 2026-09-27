@@ -5,6 +5,7 @@ export interface AuthContextValue {
   user: AuthUser | null
   isAuthenticated: boolean
   hasActor: (actors: Actor[]) => boolean
+  setSession: (user: AuthUser, accessToken: string) => void
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)
