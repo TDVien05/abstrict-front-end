@@ -11,26 +11,30 @@ const navByActor: Record<Actor | 'public', { label: string; to: string }[]> = {
   public: [
     { label: 'Dịch vụ', to: '/#services' },
     { label: 'Tìm người làm', to: '/#partners' },
+    { label: 'Cách đặt dịch vụ', to: '/#booking-options' },
     { label: 'Cách hoạt động', to: '/#how-it-works' },
-    { label: 'Trở thành đối tác', to: '/dang-ky-doi-tac' },
+    { label: 'Theo dõi ca dọn', to: '/#workflow' },
+    { label: 'Hỏi đáp', to: '/#trust-and-faq' },
   ],
   customer: [
-    { label: 'Khám phá dịch vụ', to: '/kham-pha' },
-    { label: 'Đơn của tôi', to: '/don-hang' },
-    { label: 'Cổng đối tác', to: '/dang-ky-doi-tac' },
+    { label: 'Khám phá dịch vụ', to: '/discover' },
+    { label: 'Đơn của tôi', to: '/orders' },
+    { label: 'Cổng đối tác', to: '/partners/register' },
   ],
   freelancer: [
-    { label: 'Tổng quan', to: '/doi-tac/dashboard' },
-    { label: 'Lịch làm việc', to: '/doi-tac/lich' },
-    { label: 'Gói hiển thị', to: '/doi-tac/goi' },
+    { label: 'Tổng quan', to: '/partner/dashboard' },
+    { label: 'Đơn đặt lịch', to: '/partner/orders' },
+    { label: 'Lịch làm việc', to: '/partner/schedule' },
+    { label: 'Gói hiển thị', to: '/partner/plans' },
   ],
   company: [
-    { label: 'Tổng quan', to: '/doi-tac/dashboard' },
-    { label: 'Gói hiển thị', to: '/doi-tac/goi' },
+    { label: 'Tổng quan', to: '/partner/dashboard' },
+    { label: 'Đơn đặt lịch', to: '/partner/orders' },
+    { label: 'Gói hiển thị', to: '/partner/plans' },
   ],
   admin: [
-    { label: 'Duyệt hồ sơ', to: '/admin/duyet' },
-    { label: 'Khiếu nại', to: '/admin/khieu-nai' },
+    { label: 'Duyệt hồ sơ', to: '/admin/approvals' },
+    { label: 'Khiếu nại', to: '/admin/disputes' },
   ],
 }
 
@@ -44,7 +48,7 @@ export function AppTopbar({ actor = 'public' }: AppTopbarProps) {
               <BrandLogo />
             </span>
           </NavLink>
-          <nav aria-label="Điều hướng chính" className="hidden items-center gap-8 text-[15px] font-medium text-brand-muted md:flex">
+          <nav aria-label="Điều hướng chính" className="hidden items-center gap-5 text-[14px] font-medium text-brand-muted lg:gap-7 lg:text-[15px] xl:gap-9 md:flex">
             {navByActor.public.map((item) => (
               <a className="transition-colors hover:text-brand-charcoal" href={item.to} key={item.to}>
                 {item.label}
@@ -69,7 +73,7 @@ export function AppTopbar({ actor = 'public' }: AppTopbarProps) {
       <header className="sticky top-0 z-40 border-b border-brand-border bg-white/95 backdrop-blur-xl">
         <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-5 lg:gap-8">
-            <NavLink aria-label="ABSTRICT - Trang chủ" className="shrink-0" to="/kham-pha"><BrandLogo size="sm" /></NavLink>
+            <NavLink aria-label="ABSTRICT - Trang chủ" className="shrink-0" to="/discover"><BrandLogo size="sm" /></NavLink>
             <nav aria-label="Điều hướng khách hàng" className="hidden items-center gap-1 md:flex">
               {navByActor.customer.map((item) => (
                 <NavLink className={({ isActive }) => `rounded-lg px-3 py-2 text-sm font-semibold transition ${isActive ? 'bg-slate-100 text-brand-charcoal' : 'text-brand-muted hover:bg-slate-50 hover:text-brand-charcoal'}`} key={item.to} to={item.to}>{item.label}</NavLink>
@@ -90,11 +94,11 @@ export function AppTopbar({ actor = 'public' }: AppTopbarProps) {
 
   return (
     <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-16 max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-3 lg:px-8">
         <NavLink aria-label="ABSTRICT - Trang chủ" to="/">
           <BrandLogo />
         </NavLink>
-        <nav aria-label="Điều hướng chính" className="flex items-center gap-1 sm:gap-3">
+        <nav aria-label="Điều hướng chính" className="flex flex-wrap items-center gap-1 sm:gap-3">
           {navByActor[actor].map((item) => (
             <NavLink
               className={({ isActive }) =>

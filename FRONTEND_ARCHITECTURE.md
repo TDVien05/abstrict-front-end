@@ -31,10 +31,10 @@ Mỗi feature có `components/`, `api/`, `hooks/`, `types/`, `assets/` khi cần
 
 | Layout | Route ví dụ | Nội dung |
 | --- | --- | --- |
-| Public | `/`, `/doi-tac`, `/doi-tac/:id` | Landing, tìm kiếm, hồ sơ freelancer/công ty và lịch rảnh/bận |
-| Customer | `/dat-lich/:providerId`, `/don-hang`, `/don-hang/:id` | Checklist, chọn giờ/giá, cọc, QR của khách, nghiệm thu, đánh giá, khiếu nại |
-| Partner | `/doi-tac/dashboard`, `/doi-tac/lich`, `/doi-tac/don-hang/:id`, `/doi-tac/goi` | Hồ sơ, lịch freelancer, nhận đơn, scanner QR, ảnh/checklist, gói và thống kê |
-| Admin | `/admin/duyet`, `/admin/khieu-nai` | Duyệt hồ sơ/KYC, quyết định khiếu nại |
+| Public | `/`, `/partners`, `/partners/register`, `/partners/:id` | Landing, tìm kiếm, hồ sơ freelancer/công ty và lịch rảnh/bận |
+| Customer | `/discover`, `/book/:providerId`, `/orders`, `/orders/:id` | Checklist, chọn giờ/giá, cọc, QR của khách, nghiệm thu, đánh giá, khiếu nại |
+| Partner | `/partner/dashboard`, `/partner/schedule`, `/partner/orders/:id`, `/partner/plans` | Hồ sơ, lịch freelancer, nhận đơn, scanner QR, ảnh/checklist, gói và thống kê |
+| Admin | `/admin/approvals`, `/admin/disputes` | Duyệt hồ sơ/KYC, quyết định khiếu nại |
 
 Tách `PublicLayout`, `AppLayout`, `PartnerLayout`, `AdminLayout`; **topbar dùng một component chuẩn** với nội dung theo actor, tránh mỗi màn một header khác nhau. Route guard để điều hướng UX; BE vẫn kiểm quyền cuối cùng. Công ty không thấy form khai báo lịch freelancer.
 
@@ -56,7 +56,7 @@ Tách `PublicLayout`, `AppLayout`, `PartnerLayout`, `AdminLayout`; **topbar dùn
 ## 5. Design system, accessibility và chất lượng
 
 - Toàn bộ frontend dùng **Nunito Sans** self-host, theo thang chữ và semantic classes trong `DESIGN_SYSTEM.md`; không tự chọn font riêng theo feature hoặc route. Tiêu đề trang lớn, weight 600, câu ngắn, căn trái; đoạn giới thiệu lớn hơn body và có chiều rộng đọc thoải mái.
-- Tailwind tokens dùng nền trắng ngà, chữ gần đen, nhấn tím ABSTRICT và màu trạng thái; spacing 4/8px. Ưu tiên khoảng trắng và hierarchy chữ; hạn chế uppercase, badge, icon trang trí, text quá nhỏ và border card không cần thiết.
+- Tailwind tokens dùng nền trắng ngà, chữ gần đen, nhấn xanh pastel ABSTRICT và màu trạng thái; spacing 4/8px. Ưu tiên khoảng trắng và hierarchy chữ; hạn chế uppercase, badge, icon trang trí, text quá nhỏ và border card không cần thiết.
 - Nội dung chia nhóm rõ, text đủ đọc và khoảng trắng thoáng; responsive desktop/tablet/mobile, giảm heading theo `clamp()` thay vì nén line-height. Trạng thái loading, empty, error và success cho các trang dữ liệu. Dialog có quản lý focus, form có label sentence case, lịch có cách chọn bằng bàn phím và không chỉ dùng màu phân biệt rảnh/bận.
 - Kiểm thử ít nhưng có giá trị: unit cho format và map lỗi, component cho lịch chọn ca ≥ 2 giờ, E2E cho tìm → booking → cọc sandbox và hủy/đổi lịch xảy ra xung đột; kiểm tra các breakpoint chính.
 

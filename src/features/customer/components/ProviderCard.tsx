@@ -4,7 +4,7 @@ import { formatVnd } from '../../../shared/lib/format-currency'
 import type { ProviderSummary } from '../customer-content'
 
 export function ProviderCard({ provider }: { provider: ProviderSummary }) {
-  const profilePath = `/kham-pha/${provider.id}`
+  const profilePath = `/discover/${provider.id}`
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-brand-border bg-white shadow-[0_2px_8px_rgba(23,25,28,0.04)] transition hover:-translate-y-0.5 hover:shadow-lg">

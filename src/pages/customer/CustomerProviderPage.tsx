@@ -30,13 +30,13 @@ export function CustomerProviderPage() {
   const total = service.price * duration
 
   function continueBooking() {
-    navigate(`/dat-lich/${provider.id}`, { state: { date: days[selectedDay].date, endTime, serviceId, startTime } })
+    navigate(`/book/${provider.id}`, { state: { date: days[selectedDay].date, endTime, serviceId, startTime } })
   }
 
   return (
     <main className="pb-20">
       <CustomerContainer className="py-6 sm:py-8">
-        <div className="mb-5 flex items-center justify-between"><Link className="inline-flex items-center gap-2 text-sm font-semibold text-brand-muted hover:text-brand-charcoal" to="/kham-pha"><ArrowLeft aria-hidden="true" className="h-4 w-4" />Danh sách đối tác</Link><button className="inline-flex items-center gap-2 rounded-xl border border-brand-border bg-white px-3 py-2 text-sm font-semibold text-brand-muted hover:text-brand-charcoal" type="button"><Share2 aria-hidden="true" className="h-4 w-4" />Chia sẻ</button></div>
+        <div className="mb-5 flex items-center justify-between"><Link className="inline-flex items-center gap-2 text-sm font-semibold text-brand-muted hover:text-brand-charcoal" to="/discover"><ArrowLeft aria-hidden="true" className="h-4 w-4" />Danh sách đối tác</Link><button className="inline-flex items-center gap-2 rounded-xl border border-brand-border bg-white px-3 py-2 text-sm font-semibold text-brand-muted hover:text-brand-charcoal" type="button"><Share2 aria-hidden="true" className="h-4 w-4" />Chia sẻ</button></div>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_380px]">
           <div className="space-y-6">

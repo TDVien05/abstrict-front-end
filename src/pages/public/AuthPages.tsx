@@ -327,7 +327,7 @@ export function SignInPage() {
       const from = (location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null)?.from
       const destination = from?.pathname && from.pathname !== '/login'
         ? `${from.pathname}${from.search ?? ''}${from.hash ?? ''}`
-        : '/kham-pha'
+        : '/discover'
       navigate(destination, { replace: true })
     } catch (error) {
       setError('root', { message: getAuthApiErrorMessage(error) })

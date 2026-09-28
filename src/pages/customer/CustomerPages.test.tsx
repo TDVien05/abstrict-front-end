@@ -13,11 +13,11 @@ afterEach(cleanup)
 describe('customer booking screens', () => {
   it('moves from discovery to provider scheduling and booking confirmation', async () => {
     render(
-      <MemoryRouter initialEntries={['/kham-pha']}>
+      <MemoryRouter initialEntries={['/discover']}>
         <Routes>
-          <Route element={<CustomerDiscoveryPage />} path="/kham-pha" />
-          <Route element={<CustomerProviderPage />} path="/kham-pha/:providerId" />
-          <Route element={<BookingCreatePage />} path="/dat-lich/:providerId" />
+          <Route element={<CustomerDiscoveryPage />} path="/discover" />
+          <Route element={<CustomerProviderPage />} path="/discover/:providerId" />
+          <Route element={<BookingCreatePage />} path="/book/:providerId" />
         </Routes>
       </MemoryRouter>,
     )
@@ -32,8 +32,8 @@ describe('customer booking screens', () => {
 
   it('shows live order evidence, QR check-in and extension controls', () => {
     render(
-      <MemoryRouter initialEntries={['/don-hang/HC-241028-09']}>
-        <Routes><Route element={<OrderDetailPage />} path="/don-hang/:id" /></Routes>
+      <MemoryRouter initialEntries={['/orders/HC-241028-09']}>
+        <Routes><Route element={<OrderDetailPage />} path="/orders/:id" /></Routes>
       </MemoryRouter>,
     )
 

@@ -43,7 +43,7 @@ export function BookingCreatePage() {
 
   function confirmDeposit() {
     setMessage('Thông tin booking đã sẵn sàng gửi đến API tạo đơn và khởi tạo giao dịch cọc.')
-    window.setTimeout(() => navigate('/don-hang/HC-241028-09'), 650)
+    window.setTimeout(() => navigate('/orders/HC-241028-09'), 650)
   }
 
   return (

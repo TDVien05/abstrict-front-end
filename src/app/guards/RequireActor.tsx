@@ -16,7 +16,7 @@ export function RequireActor({ allow, children }: RequireActorProps) {
   }
 
   if (!hasActor(allow)) {
-    return <Navigate replace to="/khong-co-quyen" />
+    return <Navigate replace to="/forbidden" />
   }
 
   return children

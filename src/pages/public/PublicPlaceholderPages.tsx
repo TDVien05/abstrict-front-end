@@ -6,9 +6,7 @@ export function ProviderProfilePage() {
   return <PageShell description={`Hồ sơ, dịch vụ và khả dụng của đối tác ${id ?? ''} sẽ được ghép từ feature profiles và availability.`} title="Hồ sơ đối tác" />
 }
 
-export function PartnerRegistrationPage() {
-  return <PageShell description="Form sẽ phân nhánh KYC freelancer và hồ sơ công ty theo hợp đồng API." title="Trở thành đối tác" />
-}
+export { PartnerRegistrationPage } from '../partner/PartnerRegistrationPage'
 
 export function ForbiddenPage() {
   return <PageShell description="Tài khoản hiện tại không có quyền truy cập khu vực này." title="Không có quyền truy cập" />

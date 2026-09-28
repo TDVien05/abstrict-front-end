@@ -110,7 +110,7 @@ export function HeroSection() {
       page: '1',
       pageSize: '12',
     })
-    navigate(`/doi-tac?${params.toString()}`)
+    navigate(`/partners?${params.toString()}`)
   }
 
   return (
@@ -214,7 +214,7 @@ export function PartnerSection() {
           <h2 className="section-title mx-auto mb-5">Tìm người làm phù hợp với lịch của bạn</h2>
           <p className="section-intro mx-auto">Freelancer đã xác thực lịch rảnh hoặc công ty chuyên nghiệp hỗ trợ theo yêu cầu.</p>
           <div className="mt-6">
-            <Link className="inline-flex items-center gap-1 text-sm font-semibold text-brand-blue-ink transition-colors hover:text-brand-charcoal" to="/doi-tac">Xem tất cả đối tác →</Link>
+            <Link className="inline-flex items-center gap-1 text-sm font-semibold text-brand-blue-ink transition-colors hover:text-brand-charcoal" to="/partners">Xem tất cả đối tác →</Link>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -243,7 +243,7 @@ export function PartnerSection() {
                   <span className="text-xs font-medium text-brand-muted">{partner.footerLabel}</span>
                   <span className={`${partner.company ? 'text-sm' : 'text-base'} font-bold text-brand-charcoal`}>{partner.footerValue}{partner.footerSuffix ? <span className="text-xs font-normal text-brand-muted">{partner.footerSuffix}</span> : null}</span>
                 </div>
-                <Link className="block w-full rounded-xl border border-brand-charcoal bg-white px-4 py-2.5 text-center text-sm font-semibold text-brand-charcoal transition-colors hover:bg-brand-charcoal hover:text-white" to="/doi-tac">{partner.action}</Link>
+                <Link className="block w-full rounded-xl border border-brand-charcoal bg-white px-4 py-2.5 text-center text-sm font-semibold text-brand-charcoal transition-colors hover:bg-brand-charcoal hover:text-white" to="/partners">{partner.action}</Link>
               </div>
             </article>
           ))}
@@ -356,7 +356,7 @@ export function TransparentWorkflowSection() {
   }
 
   return (
-    <section className="content-section">
+    <section className="content-section" id="workflow">
       <Reveal className={containerClass}>
         <div className="mx-auto mb-14 max-w-3xl text-center">
           <div className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-purple"><Camera aria-hidden="true" className="h-4 w-4" />Theo dõi ca dọn</div>
@@ -476,7 +476,7 @@ export function LandingCallToAction() {
             <p className="mx-auto mb-10 max-w-2xl text-lg font-normal leading-relaxed text-white/70">Trải nghiệm đặt người giúp việc căn hộ minh bạch, nhanh chóng và chuẩn xác ngay hôm nay.</p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <a className="inline-flex w-full items-center justify-center rounded-xl bg-white px-8 py-3.5 text-sm font-semibold text-brand-charcoal transition-colors hover:bg-brand-sand sm:w-auto" href="#hero-search">Tìm người làm ngay</a>
-              <Link className="inline-flex w-full items-center justify-center rounded-xl border border-white/20 px-6 py-3.5 text-sm font-semibold text-white/90 transition-colors hover:border-white/40 hover:text-white sm:w-auto" to="/dang-ky-doi-tac">Đăng ký làm đối tác (Dành cho Freelancer & Công ty) →</Link>
+              <Link className="inline-flex w-full items-center justify-center rounded-xl border border-white/20 px-6 py-3.5 text-sm font-semibold text-white/90 transition-colors hover:border-white/40 hover:text-white sm:w-auto" to="/partners/register">Đăng ký làm đối tác (Dành cho Freelancer & Công ty) →</Link>
             </div>
           </div>
         </div>

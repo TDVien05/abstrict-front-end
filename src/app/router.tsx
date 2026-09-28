@@ -1,10 +1,11 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { createBrowserRouter } from 'react-router-dom'
 import { RequireActor } from './guards/RequireActor'
 import { RouteErrorBoundary } from './errors/RouteErrorBoundary'
 import { AdminLayout } from './layouts/AdminLayout'
 import { AppLayout } from './layouts/AppLayout'
 import { PartnerLayout } from './layouts/PartnerLayout'
 import { PublicLayout } from './layouts/PublicLayout'
+import { RootLayout } from './layouts/RootLayout'
 import { RouteTransition } from '../shared/ui/RouteTransition'
 import { AdminApprovalsPage, AdminDisputesPage } from '../pages/admin/AdminPages'
 import { BookingCreatePage, CustomerDiscoveryPage, CustomerProviderPage, OrderDetailPage, OrdersPage } from '../pages/customer/CustomerPages'
@@ -13,6 +14,7 @@ import {
   PartnerDashboardPage,
   PartnerOrderDetailPage,
   PartnerPlansPage,
+  PartnerOrdersPage,
 } from '../pages/partner/PartnerPages'
 import { DiscoveryPage } from '../pages/public/DiscoveryPage'
 import { HomePage } from '../pages/public/HomePage'
@@ -25,74 +27,78 @@ import {
 } from '../pages/public/PublicPlaceholderPages'
 
 export const router = createBrowserRouter([
-  { path: 'login', element: <RouteTransition><SignInPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
-  { path: 'register', element: <RouteTransition><SignUpPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
-  { path: 'verify-otp', element: <RouteTransition><OtpVerificationPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
-  { path: 'dang-nhap', element: <Navigate replace to="/login" /> },
-  { path: 'dang-ky', element: <Navigate replace to="/register" /> },
-  { path: 'xac-thuc-otp', element: <Navigate replace to="/verify-otp" /> },
   {
-    element: <PublicLayout />,
+    element: <RootLayout />,
     errorElement: <RouteErrorBoundary />,
     children: [
-      { index: true, element: <HomePage /> },
-      { path: 'doi-tac', element: <DiscoveryPage /> },
-      { path: 'doi-tac/:id', element: <ProviderProfilePage /> },
-      { path: 'dang-ky-doi-tac', element: <PartnerRegistrationPage /> },
-      { path: 'khong-co-quyen', element: <ForbiddenPage /> },
-    ],
-  },
-  {
-    element: (
-      <RequireActor allow={['customer']}>
-        <AppLayout />
-      </RequireActor>
-    ),
-    errorElement: <RouteErrorBoundary />,
-    children: [
-      { path: 'kham-pha', element: <CustomerDiscoveryPage /> },
-      { path: 'kham-pha/:providerId', element: <CustomerProviderPage /> },
-      { path: 'dat-lich/:providerId', element: <BookingCreatePage /> },
-      { path: 'don-hang', element: <OrdersPage /> },
-      { path: 'don-hang/:id', element: <OrderDetailPage /> },
-    ],
-  },
-  {
-    element: (
-      <RequireActor allow={['freelancer', 'company']}>
-        <PartnerLayout />
-      </RequireActor>
-    ),
-    errorElement: <RouteErrorBoundary />,
-    children: [
-      { path: 'doi-tac/dashboard', element: <PartnerDashboardPage /> },
+      { path: 'login', element: <RouteTransition><SignInPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
+      { path: 'register', element: <RouteTransition><SignUpPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
+      { path: 'verify-otp', element: <RouteTransition><OtpVerificationPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
       {
-        path: 'doi-tac/lich',
+        element: <PublicLayout />,
+        errorElement: <RouteErrorBoundary />,
+        children: [
+          { index: true, element: <HomePage /> },
+          { path: 'partners', element: <DiscoveryPage /> },
+          { path: 'partners/register', element: <PartnerRegistrationPage /> },
+          { path: 'partners/:id', element: <ProviderProfilePage /> },
+          { path: 'forbidden', element: <ForbiddenPage /> },
+        ],
+      },
+      {
         element: (
-          <RequireActor allow={['freelancer']}>
-            <PartnerAvailabilityPage />
+          <RequireActor allow={['customer']}>
+            <AppLayout />
           </RequireActor>
         ),
+        errorElement: <RouteErrorBoundary />,
+        children: [
+          { path: 'discover', element: <CustomerDiscoveryPage /> },
+          { path: 'discover/:providerId', element: <CustomerProviderPage /> },
+          { path: 'book/:providerId', element: <BookingCreatePage /> },
+          { path: 'orders', element: <OrdersPage /> },
+          { path: 'orders/:id', element: <OrderDetailPage /> },
+        ],
       },
-      { path: 'doi-tac/don-hang/:id', element: <PartnerOrderDetailPage /> },
-      { path: 'doi-tac/goi', element: <PartnerPlansPage /> },
+      {
+        element: (
+          <RequireActor allow={['freelancer', 'company']}>
+            <PartnerLayout />
+          </RequireActor>
+        ),
+        errorElement: <RouteErrorBoundary />,
+        children: [
+          { path: 'partner/dashboard', element: <PartnerDashboardPage /> },
+          {
+            path: 'partner/schedule',
+            element: (
+              <RequireActor allow={['freelancer']}>
+                <PartnerAvailabilityPage />
+              </RequireActor>
+            ),
+          },
+          { path: 'partner/orders/:id', element: <PartnerOrderDetailPage /> },
+          { path: 'partner/orders', element: <PartnerOrdersPage /> },
+          { path: 'partner/plans', element: <PartnerPlansPage /> },
+        ],
+      },
+      {
+        element: (
+          <RequireActor allow={['admin']}>
+            <AdminLayout />
+          </RequireActor>
+        ),
+        errorElement: <RouteErrorBoundary />,
+        children: [
+          { path: 'admin/approvals', element: <AdminApprovalsPage /> },
+          { path: 'admin/disputes', element: <AdminDisputesPage /> },
+        ],
+      },
+      {
+        path: '*',
+        element: <RouteTransition><NotFoundPage /></RouteTransition>,
+        errorElement: <RouteErrorBoundary />,
+      },
     ],
-  },
-  {
-    element: (
-      <RequireActor allow={['admin']}>
-        <AdminLayout />
-      </RequireActor>
-    ),
-    errorElement: <RouteErrorBoundary />,
-    children: [
-      { path: 'admin/duyet', element: <AdminApprovalsPage /> },
-      { path: 'admin/khieu-nai', element: <AdminDisputesPage /> },
-    ],
-  },
-  {
-    path: '*',
-    element: <RouteTransition><NotFoundPage /></RouteTransition>,
-    errorElement: <RouteErrorBoundary />,
   },
 ])
