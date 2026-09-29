@@ -1,10 +1,11 @@
 import { Bell, ChevronDown, Search } from 'lucide-react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import type { Actor } from '../../entities/auth'
 import { BrandLogo } from '../../shared/ui/BrandLogo'
 
 interface AppTopbarProps {
   actor?: Actor | 'public'
+  registration?: boolean
 }
 
 const navByActor: Record<Actor | 'public', { label: string; to: string }[]> = {
@@ -38,7 +39,23 @@ const navByActor: Record<Actor | 'public', { label: string; to: string }[]> = {
   ],
 }
 
-export function AppTopbar({ actor = 'public' }: AppTopbarProps) {
+export function AppTopbar({ actor = 'public', registration = false }: AppTopbarProps) {
+  if (registration) {
+    return (
+      <header className="sticky top-0 z-40 border-b border-brand-border bg-white/95 backdrop-blur-xl">
+        <div className="flex min-h-16 w-full flex-wrap items-center justify-between gap-4 px-6 py-3 sm:px-8 lg:px-10 2xl:px-12">
+          <NavLink aria-label="ABSTRICT - Trang chủ" className="shrink-0" to="/"><BrandLogo size="sm" /></NavLink>
+          <nav aria-label="Điều hướng cổng đối tác" className="order-3 flex w-full flex-wrap items-center gap-1 text-sm lg:order-none lg:w-auto">
+            {[{ label: 'Khám phá dịch vụ', to: '/' }, { label: 'Đơn của tôi', to: '/orders' }, { label: 'Cổng đối tác', to: '/partners/register' }].map((item) => <NavLink key={item.to} to={item.to} className={({ isActive }) => `rounded-lg px-3 py-2 font-semibold ${isActive ? 'bg-brand-blue-pastel-soft text-brand-blue-ink' : 'text-brand-muted hover:bg-brand-sand'}`}>{item.label}</NavLink>)}
+            <a className="rounded-lg px-3 py-2 text-brand-muted hover:bg-brand-sand" href="mailto:support@abstrict.vn">Hỗ trợ</a>
+          </nav>
+          <div className="flex items-center gap-3">
+            <NavLink className="rounded-lg bg-brand-charcoal px-3 py-2 text-sm font-semibold text-white hover:bg-black" to="/partners/login">Đăng nhập</NavLink>
+          </div>
+        </div>
+      </header>
+    )
+  }
   if (actor === 'public') {
     return (
       <header className="sticky top-0 z-50 border-b border-brand-border bg-brand-sand/90 backdrop-blur-md">
@@ -54,6 +71,7 @@ export function AppTopbar({ actor = 'public' }: AppTopbarProps) {
                 {item.label}
               </a>
             ))}
+            <Link className="transition-colors hover:text-brand-charcoal" to="/partners/register">Trở thành đối tác</Link>
           </nav>
           <div className="flex items-center gap-2 sm:gap-4">
             <NavLink className="hidden px-2 py-2 text-[15px] font-semibold text-brand-charcoal transition-opacity hover:opacity-70 sm:block sm:px-3" to="/login">

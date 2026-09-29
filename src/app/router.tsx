@@ -18,7 +18,9 @@ import {
 } from '../pages/partner/PartnerPages'
 import { DiscoveryPage } from '../pages/public/DiscoveryPage'
 import { HomePage } from '../pages/public/HomePage'
-import { OtpVerificationPage, SignInPage, SignUpPage } from '../pages/public/AuthPages'
+import { OtpVerificationPage, PartnerSignInPage, PartnerSignUpPage, SignInPage, SignUpPage } from '../pages/public/AuthPages'
+import { PartnerCompanyPage } from '../pages/partner/PartnerCompanyPage'
+import { PartnerTypeChoicePage } from '../pages/partner/PartnerTypeChoicePage'
 import {
   ForbiddenPage,
   NotFoundPage,
@@ -34,13 +36,17 @@ export const router = createBrowserRouter([
       { path: 'login', element: <RouteTransition><SignInPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
       { path: 'register', element: <RouteTransition><SignUpPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
       { path: 'verify-otp', element: <RouteTransition><OtpVerificationPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
+      { path: 'partners/register/freelancer', element: <RouteTransition><PartnerSignUpPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
+      { path: 'partners/login', element: <RouteTransition><PartnerSignInPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
       {
         element: <PublicLayout />,
         errorElement: <RouteErrorBoundary />,
         children: [
           { index: true, element: <HomePage /> },
           { path: 'partners', element: <DiscoveryPage /> },
-          { path: 'partners/register', element: <PartnerRegistrationPage /> },
+          { path: 'partners/register', element: <PartnerTypeChoicePage /> },
+          { path: 'partners/register/kyc', element: <PartnerRegistrationPage /> },
+          { path: 'partners/register/company', element: <PartnerCompanyPage /> },
           { path: 'partners/:id', element: <ProviderProfilePage /> },
           { path: 'forbidden', element: <ForbiddenPage /> },
         ],

@@ -31,7 +31,7 @@ Mỗi feature có `components/`, `api/`, `hooks/`, `types/`, `assets/` khi cần
 
 | Layout | Route ví dụ | Nội dung |
 | --- | --- | --- |
-| Public | `/`, `/partners`, `/partners/register`, `/partners/:id` | Landing, tìm kiếm, hồ sơ freelancer/công ty và lịch rảnh/bận |
+| Public | `/`, `/partners`, `/partners/register`, `/partners/register/freelancer`, `/partners/register/kyc`, `/partners/:id` | Landing, tìm kiếm, chọn hình thức đối tác, đăng ký freelancer, hồ sơ/KYC đối tác và lịch rảnh/bận |
 | Customer | `/discover`, `/book/:providerId`, `/orders`, `/orders/:id` | Checklist, chọn giờ/giá, cọc, QR của khách, nghiệm thu, đánh giá, khiếu nại |
 | Partner | `/partner/dashboard`, `/partner/schedule`, `/partner/orders/:id`, `/partner/plans` | Hồ sơ, lịch freelancer, nhận đơn, scanner QR, ảnh/checklist, gói và thống kê |
 | Admin | `/admin/approvals`, `/admin/disputes` | Duyệt hồ sơ/KYC, quyết định khiếu nại |

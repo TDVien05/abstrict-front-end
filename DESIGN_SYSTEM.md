@@ -12,7 +12,7 @@ Tài liệu này là nguồn thống nhất cho cách trình bày mọi màn hì
 
 ## 2. Màu sắc và accent
 
-Accent duy nhất của sản phẩm là **họ xanh pastel**. Mọi màn hình mới — public, customer, partner và admin — dùng họ này cho hành động chính, link, tiêu điểm và trạng thái nhấn. **Không dùng tím.**
+Accent duy nhất của sản phẩm là **họ xanh pastel**. Mọi màn hình mới — public, customer, partner và admin — dùng họ này cho link, tiêu điểm và trạng thái nhấn. Nút bấm mặc định nền đen, chữ trắng; chỉ nút được chỉ định riêng mới dùng xanh pastel. **Không dùng tím.**
 
 | Vai trò | Token Tailwind | Mã màu |
 | --- | --- | --- |
@@ -21,13 +21,15 @@ Accent duy nhất của sản phẩm là **họ xanh pastel**. Mọi màn hình 
 | Chữ chính | `brand-charcoal` | `#17191C` |
 | Chữ phụ | `brand-muted` | `#667085` |
 | Viền | `brand-border` | `#EBECEF` |
-| Accent — hành động chính | `brand-blue-pastel` | `#9BCDF0` |
+| Accent — nút được chỉ định riêng | `brand-blue-pastel` | `#9BCDF0` |
 | Accent — hover | `brand-blue-pastel-hover` | `#82BDE7` |
 | Accent — nền nhấn nhẹ, badge, ô thông tin | `brand-blue-pastel-soft` | `#EAF6FF` |
 | Accent — chữ, link, icon nhấn | `brand-blue-ink` | `#245B7D` |
 | Trạng thái thành công | `brand-green` | `#20A67A` |
 
-- Hành động chính: nền `brand-blue-pastel`, chữ `brand-charcoal`, hover `brand-blue-pastel-hover`; trong code dùng `Button variant="blue"`.
+- Nút bấm mặc định, gồm đăng nhập, lưu nháp và gửi hồ sơ: nền `brand-charcoal`, chữ trắng, hover đen; dùng `Button` hoặc `Button variant="dark"`.
+- Chỉ nút được chỉ định riêng mới dùng nền `brand-blue-pastel`, chữ `brand-charcoal`, hover `brand-blue-pastel-hover`; trong code dùng `Button variant="blue"`.
+- Nhóm nút hành động phụ trong khối tải tệp/KYC (chọn ảnh, chọn tệp, xem chi tiết, đóng) thuộc nhóm được chỉ định: nền `brand-blue-pastel`, chữ `brand-charcoal`, hover `brand-blue-pastel-hover`.
 - Link và chữ nhấn: `brand-blue-ink`. Không đặt chữ xanh pastel nhạt trên nền trắng vì không đủ tương phản.
 - Nền nhấn nhẹ, badge phụ, ô thông tin: nền `brand-blue-pastel-soft` đi kèm chữ `brand-blue-ink`.
 - Tiêu điểm/focus: viền `brand-blue-pastel-hover`, ring `brand-blue-pastel`.
@@ -69,6 +71,7 @@ Toàn bộ sản phẩm dùng **Nunito Sans**, self-host từ package `@fontsour
 - Dashboard vẫn dùng tiêu đề trang lớn và phần giới thiệu ngắn trước các widget; số liệu không thay thế hierarchy của trang.
 - Text phụ dùng `#667085`, nhưng phải giữ độ tương phản và cỡ chữ đọc được.
 - Trạng thái nhấn trong form (checkbox, thanh tiến độ) dùng accent xanh pastel: `accent-brand-blue-pastel-hover`.
+- Header khối form như KYC dùng tiêu đề gọn 16–18px, weight 600; icon, tiêu đề và nhãn phụ cùng một hàng. Không dùng `section-title` lớn cho loại header này. Trên màn hình hẹp, tiêu đề có thể rút gọn bằng ellipsis, giữ đầy đủ nội dung trong thuộc tính `title`.
 
 ## 6. Kiểm tra trước khi bàn giao
 

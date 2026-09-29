@@ -4,7 +4,7 @@ Source: UI Screen Generator, project `8209048964041012099`.
 
 | Canvas label | Screen ID | Route |
 | --- | --- | --- |
-| F1 – Đăng ký & Định danh KYC | `b8ab0645fd034de9a829b483893b3c43` | `/partners/register` |
+| F1 – Đăng ký & Định danh KYC | `b8ab0645fd034de9a829b483893b3c43` | `/partners/register/kyc` |
 | F2-F3 – Dashboard đối tác & Mua gói | `f87fbca2dd96468f941f0ebbb477ff55` | `/partner/dashboard`, `/partner/plans` |
 | F4 – Quản lý đơn đặt lịch & Xác nhận ca | `c3fad7fd37fd4cd48f2c2bacd57439ee` | `/partner/orders` |
 

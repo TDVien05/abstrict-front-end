@@ -15,7 +15,9 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     headers.set('Authorization', `Bearer ${accessToken}`)
   }
 
-  if (options.body !== undefined) {
+  const body = options.body as BodyInit | undefined
+  const isFormData = body instanceof FormData
+  if (body !== undefined && !isFormData) {
     headers.set('Content-Type', 'application/json')
   }
 
@@ -23,7 +25,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     ...options,
     credentials: 'include',
     headers,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
   })
 
   if (!response.ok) {

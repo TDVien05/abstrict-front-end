@@ -36,6 +36,13 @@ import {
   type CustomerRegistrationResponse,
 } from '../../features/auth/api/customer-registration'
 import { loginCustomer } from '../../features/auth/api/customer-session'
+import {
+  loginPartner,
+  partnerOnboardingStepAnchors,
+  registerPartner,
+  resendPartnerPhoneOtp,
+  verifyPartnerPhoneOtp,
+} from '../../features/auth/api/partner-registration'
 import { useAuth } from '../../features/auth/auth-context'
 import { BrandLogo } from '../../shared/ui/BrandLogo'
 
@@ -419,6 +426,114 @@ export function SignUpPage() {
   )
 }
 
+export function PartnerSignUpPage() {
+  const navigate = useNavigate()
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false)
+  const [isTermsOpen, setIsTermsOpen] = useState(false)
+  const privacyButtonRef = useRef<HTMLButtonElement>(null)
+  const termsButtonRef = useRef<HTMLButtonElement>(null)
+  const registrationMutation = useMutation({ mutationFn: registerPartner })
+  const { formState: { errors, isSubmitting }, handleSubmit, register, setError } = useForm<SignUpValues>({ resolver: zodResolver(signUpSchema) })
+
+  function closeTerms() {
+    setIsTermsOpen(false)
+    window.requestAnimationFrame(() => termsButtonRef.current?.focus())
+  }
+
+  function closePrivacy() {
+    setIsPrivacyOpen(false)
+    window.requestAnimationFrame(() => privacyButtonRef.current?.focus())
+  }
+
+  async function submitRegistration(values: SignUpValues) {
+    try {
+      const response = await registrationMutation.mutateAsync({
+        fullName: values.fullName,
+        phoneNumber: values.phone,
+        password: values.password,
+        confirmPassword: values.confirmPassword,
+        acceptTermsAndPrivacy: values.acceptsTerms,
+      })
+      navigate('/verify-otp', {
+        state: {
+          ...response,
+          flow: 'freelancer',
+          backTo: '/partners/register/freelancer',
+          nextTo: '/partners/login',
+        },
+      })
+    } catch (error) {
+      setError('root', { message: getAuthApiErrorMessage(error) })
+    }
+  }
+
+  return (
+    <AuthPage centeredHeader>
+      <section className="w-full max-w-[460px] rounded-2xl border border-brand-border bg-white p-7 shadow-[0_2px_12px_rgba(0,0,0,0.03)] sm:p-9">
+        <div className="mb-6"><h1 className="text-2xl font-semibold tracking-[-0.025em] text-brand-charcoal">Tạo tài khoản đối tác</h1><p className="mt-1.5 text-sm leading-relaxed text-brand-muted">Đăng ký với tư cách Freelancer để nhận ca và hoàn tất hồ sơ định danh eKYC.</p></div>
+        <form className="space-y-4" noValidate onSubmit={handleSubmit(submitRegistration)}>
+          <label className="block text-[13px] font-medium text-brand-charcoal">Họ và tên <span className="text-red-600">*</span><input autoComplete="name" className={`${inputClass} mt-1.5`} placeholder="Nguyễn Thu Hà" {...register('fullName')} /><FieldError message={errors.fullName?.message} /></label>
+          <label className="block text-[13px] font-medium text-brand-charcoal"><span className="flex items-center justify-between"><span>Số điện thoại <span className="text-red-600">*</span></span><span className="text-[11px] font-normal text-brand-muted">Nhận mã OTP qua SMS</span></span><input autoComplete="tel" className={`${inputClass} mt-1.5`} inputMode="tel" placeholder="090 123 4567" {...register('phone')} /><FieldError message={errors.phone?.message} /></label>
+          <PasswordField autoComplete="new-password" error={errors.password?.message} label="Mật khẩu *" placeholder="Tối thiểu 8 ký tự kèm chữ và số" registration={register('password')} />
+          <PasswordField autoComplete="new-password" error={errors.confirmPassword?.message} label="Xác nhận mật khẩu *" placeholder="Nhập lại mật khẩu vừa tạo" registration={register('confirmPassword')} />
+          <div className="pt-1">
+            <div className="flex items-start gap-2.5 text-[12.5px] leading-5 text-brand-muted">
+              <input aria-label="Đồng ý với điều khoản dịch vụ và chính sách quyền riêng tư" className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-brand-charcoal" id="partner-accepts-terms" type="checkbox" {...register('acceptsTerms')} />
+              <span>
+                <label className="cursor-pointer" htmlFor="partner-accepts-terms">Tôi đồng ý với</label>{' '}
+                <button className="font-medium text-brand-charcoal hover:underline" onClick={() => setIsTermsOpen(true)} ref={termsButtonRef} type="button">Điều khoản dịch vụ</button>
+                {' '}và <button className="font-medium text-brand-charcoal hover:underline" onClick={() => setIsPrivacyOpen(true)} ref={privacyButtonRef} type="button">Chính sách quyền riêng tư</button> của ABSTRICT.
+              </span>
+            </div>
+            <FieldError message={errors.acceptsTerms?.message} />
+          </div>
+          <FieldError message={errors.root?.message} />
+          <div className="pt-2"><button className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-brand-charcoal text-sm font-semibold text-white shadow-sm transition hover:bg-black/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60" disabled={isSubmitting || registrationMutation.isPending} type="submit">{isSubmitting || registrationMutation.isPending ? 'Đang tạo tài khoản...' : 'Tạo tài khoản đối tác'}</button></div>
+          <div className="flex items-start gap-2 rounded-lg border border-brand-border bg-[#f8f9fa] p-3 text-xs leading-4 text-brand-muted"><Info aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-brand-charcoal" /><span>Mã xác thực OTP sẽ được gửi qua SMS sau khi bạn nhấn <strong>Tạo tài khoản đối tác</strong>. Sau khi xác thực, bạn sẽ tiếp tục hoàn tất hồ sơ định danh eKYC.</span></div>
+          <p className="pt-2 text-center text-[13px] text-brand-muted">Đã có tài khoản ABSTRICT? <Link className="ml-1 font-semibold text-brand-charcoal hover:underline" to="/login">Đăng nhập ngay</Link></p>
+          <p className="text-center text-[13px] text-brand-muted">Muốn đăng ký doanh nghiệp? <Link className="ml-1 font-semibold text-brand-charcoal hover:underline" to="/partners/register">Chọn hình thức khác</Link></p>
+        </form>
+      </section>
+      <LegalDialog kind="terms" isOpen={isTermsOpen} onClose={closeTerms} />
+      <LegalDialog kind="privacy" isOpen={isPrivacyOpen} onClose={closePrivacy} />
+    </AuthPage>
+  )
+}
+
+export function PartnerSignInPage() {
+  const navigate = useNavigate()
+  const { setSession } = useAuth()
+  const loginMutation = useMutation({ mutationFn: loginPartner })
+  const { formState: { errors, isSubmitting }, handleSubmit, register, setError } = useForm<SignInValues>({ resolver: zodResolver(signInSchema) })
+
+  async function submitSignIn(values: SignInValues) {
+    try {
+      const response = await loginMutation.mutateAsync({ phoneNumber: values.phone, password: values.password })
+      setSession({ id: response.userId, displayName: response.fullName, actor: 'freelancer' }, response.accessToken)
+      const anchor = partnerOnboardingStepAnchors[response.currentStep] ?? 'kyc-1'
+      navigate(`/partners/register/kyc#${anchor}`)
+    } catch (error) {
+      setError('root', { message: getAuthApiErrorMessage(error) })
+    }
+  }
+
+  return (
+    <AuthPage centeredHeader>
+      <section className="w-full max-w-[440px] rounded-2xl border border-brand-border bg-white p-8 shadow-sm sm:p-10">
+        <div className="mb-7"><h1 className="text-2xl font-semibold tracking-[-0.025em] text-brand-charcoal">Đăng nhập đối tác</h1><p className="mt-1.5 text-sm leading-relaxed text-brand-muted">Dành cho Freelancer đã đăng ký và xác thực số điện thoại.</p></div>
+        <form className="flex flex-col gap-5" noValidate onSubmit={handleSubmit(submitSignIn)}>
+          <label className="block text-xs font-semibold text-brand-charcoal">Số điện thoại<span className="relative mt-1.5 flex items-center"><span className="pointer-events-none absolute left-3.5 flex items-center gap-1 text-sm font-medium text-brand-muted"><span className="text-xs">🇻🇳</span>+84</span><input autoComplete="tel" className={`${inputClass} pl-[4.5rem]`} inputMode="tel" placeholder="090 123 4567" {...register('phone')} /></span><FieldError message={errors.phone?.message} /></label>
+          <PasswordField autoComplete="current-password" error={errors.password?.message} label="Mật khẩu *" placeholder="••••••••" registration={register('password')} />
+          <FieldError message={errors.root?.message} />
+          <button className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-brand-charcoal text-sm font-semibold text-white shadow-sm transition hover:bg-black/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60" disabled={isSubmitting || loginMutation.isPending} type="submit">{loginMutation.isPending ? 'Đang đăng nhập...' : 'Đăng nhập'} <ArrowRight aria-hidden="true" className="h-[18px] w-[18px]" /></button>
+          <div className="h-px bg-brand-border" />
+          <p className="text-center text-xs text-brand-muted">Chưa có tài khoản đối tác? <Link className="ml-1 font-semibold text-brand-charcoal transition-colors hover:text-brand-blue-ink" to="/partners/register/freelancer">Đăng ký Freelancer</Link></p>
+        </form>
+      </section>
+    </AuthPage>
+  )
+}
+
 function formatCountdown(seconds: number) {
   const minutes = Math.floor(seconds / 60)
   return `${String(minutes).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`
@@ -432,7 +547,10 @@ function secondsUntil(utcDate?: string) {
 export function OtpVerificationPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const navigationState = location.state as CustomerRegistrationResponse | null
+  const navigationState = location.state as (CustomerRegistrationResponse & { backTo?: string; nextTo?: string; flow?: 'customer' | 'freelancer' }) | null
+  const isPartnerFlow = navigationState?.flow === 'freelancer'
+  const backTo = navigationState?.backTo ?? (isPartnerFlow ? '/partners/register/freelancer' : '/register')
+  const nextTo = navigationState?.nextTo ?? (isPartnerFlow ? '/partners/login' : '/login')
   const [challenge, setChallenge] = useState<CustomerRegistrationResponse | null>(
     navigationState?.challengeId ? navigationState : null,
   )
@@ -445,8 +563,8 @@ export function OtpVerificationPage() {
   )
   const [isVerified, setIsVerified] = useState(false)
   const inputRefs = useRef<Array<HTMLInputElement | null>>([])
-  const verifyMutation = useMutation({ mutationFn: verifyPhoneOtp })
-  const resendMutation = useMutation({ mutationFn: resendPhoneOtp })
+  const verifyMutation = useMutation({ mutationFn: isPartnerFlow ? verifyPartnerPhoneOtp : verifyPhoneOtp })
+  const resendMutation = useMutation({ mutationFn: isPartnerFlow ? resendPartnerPhoneOtp : resendPhoneOtp })
   const phone = challenge?.phoneNumber ?? 'số điện thoại đã đăng ký'
 
   useEffect(() => {
@@ -525,7 +643,7 @@ export function OtpVerificationPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f8f9fa] px-4 py-8 text-brand-charcoal">
       <main className="flex w-full max-w-[460px] flex-col items-center">
-        <div className="mb-3 flex w-full items-center justify-between text-xs text-brand-muted"><button className="inline-flex items-center gap-1.5 transition-colors hover:text-brand-charcoal" onClick={() => navigate('/register')} type="button"><ArrowLeft aria-hidden="true" className="h-4 w-4" />Quay lại sửa số điện thoại</button><span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-medium">Bước 2 / 2</span></div>
+        <div className="mb-3 flex w-full items-center justify-between text-xs text-brand-muted"><button className="inline-flex items-center gap-1.5 transition-colors hover:text-brand-charcoal" onClick={() => navigate(backTo)} type="button"><ArrowLeft aria-hidden="true" className="h-4 w-4" />Quay lại sửa số điện thoại</button><span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-medium">Bước 2 / 2</span></div>
         <section className="w-full rounded-2xl bg-white p-6 shadow-sm sm:p-9">
           <div className="mb-4 flex items-center justify-between"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-blue-pastel-soft text-brand-blue-ink"><ShieldCheck aria-hidden="true" className="h-6 w-6" /></span><span className="flex items-center gap-1.5 rounded-full bg-[#f8f9fa] px-2.5 py-1 text-[11px] font-medium text-brand-muted"><span className={`h-2 w-2 rounded-full ${isVerified ? 'bg-brand-green' : 'animate-pulse bg-brand-blue-pastel-hover'}`} />{isVerified ? 'Đã xác thực' : 'Chờ nhập OTP'}</span></div>
           <div className="mb-6 space-y-1.5"><h1 className="text-2xl font-semibold tracking-[-0.025em]">Xác thực số điện thoại</h1><p className="text-sm leading-relaxed text-brand-muted">Mã xác thực 6 chữ số vừa được gửi qua SMS đến số điện thoại <strong className="font-semibold text-brand-charcoal">{phone}</strong>. Vui lòng nhập mã để hoàn tất đăng ký.</p></div>
@@ -533,7 +651,7 @@ export function OtpVerificationPage() {
             <div className="flex items-center justify-between gap-2" onPaste={handleOtpPaste}>{digits.map((digit, index) => <input aria-label={`Chữ số OTP ${index + 1}`} autoComplete={index === 0 ? 'one-time-code' : 'off'} className="h-14 w-11 rounded-xl bg-[#f8f9fa] text-center text-xl font-semibold outline-none transition focus:bg-white focus:ring-2 focus:ring-brand-blue-pastel-hover disabled:cursor-not-allowed disabled:opacity-60 sm:w-14" disabled={!challenge || isVerified || verifyMutation.isPending} inputMode="numeric" key={index} maxLength={1} onChange={(event) => updateDigit(index, event)} onKeyDown={(event) => handleOtpKeyDown(index, event)} ref={(element) => { inputRefs.current[index] = element }} value={digit} />)}</div>
             <div className="flex flex-col items-center justify-between gap-2 pt-1 text-xs text-brand-muted sm:flex-row"><span className="flex items-center gap-1.5"><Clock3 aria-hidden="true" className="h-4 w-4" />{seconds > 0 ? <>Gửi lại mã sau <strong className="text-brand-charcoal">{formatCountdown(seconds)}</strong></> : 'Bạn có thể yêu cầu mã mới'}</span><button className="font-medium text-brand-blue-ink enabled:hover:underline disabled:cursor-not-allowed disabled:opacity-45" disabled={!challenge || isVerified || seconds > 0 || resendMutation.isPending} onClick={() => { void resendOtp() }} type="button">{resendMutation.isPending ? 'Đang gửi lại...' : 'Gửi lại mã OTP'}</button></div>
             {isVerified ? (
-              <button className="mt-1 inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-charcoal text-sm font-semibold text-white transition hover:bg-black/90 active:scale-[0.99]" onClick={() => navigate('/login')} type="button">Đến trang đăng nhập <ChevronRight aria-hidden="true" className="h-[18px] w-[18px]" /></button>
+              <button className="mt-1 inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-charcoal text-sm font-semibold text-white transition hover:bg-black/90 active:scale-[0.99]" onClick={() => navigate(nextTo)} type="button">{nextTo === '/login' ? 'Đến trang đăng nhập' : 'Tiếp tục hoàn tất hồ sơ'} <ChevronRight aria-hidden="true" className="h-[18px] w-[18px]" /></button>
             ) : (
               <button className="mt-1 inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-charcoal text-sm font-semibold text-white transition hover:bg-black/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60" disabled={!challenge || verifyMutation.isPending} type="submit">{verifyMutation.isPending ? 'Đang xác thực...' : 'Xác nhận & Hoàn tất tạo tài khoản'} <CheckCircle2 aria-hidden="true" className="h-[18px] w-[18px]" /></button>
             )}
