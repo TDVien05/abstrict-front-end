@@ -198,3 +198,412 @@ a[href]:active {
     opacity: 0;
   }
 }
+
+/* ==========================================================================
+   Motion system
+   ========================================================================== */
+
+:root {
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-snappy: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Keyboard focus is architecture, not decoration. */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-brand-blue-ink);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+/* --- Scroll reveals ------------------------------------------------------ */
+
+[data-reveal] {
+  --reveal-x: 0px;
+  --reveal-y: 26px;
+  --reveal-scale: 1;
+  --reveal-blur: 0px;
+  opacity: 0;
+  transform: translate3d(var(--reveal-x), var(--reveal-y), 0) scale(var(--reveal-scale));
+  filter: blur(var(--reveal-blur));
+  transition:
+    opacity 780ms var(--ease-out-soft),
+    transform 780ms var(--ease-out-soft),
+    filter 780ms var(--ease-out-soft);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+[data-reveal='soft'] {
+  --reveal-y: 14px;
+  --reveal-blur: 8px;
+}
+
+[data-reveal='left'] {
+  --reveal-x: -40px;
+  --reveal-y: 0px;
+}
+
+[data-reveal='right'] {
+  --reveal-x: 40px;
+  --reveal-y: 0px;
+}
+
+[data-reveal='scale'] {
+  --reveal-y: 8px;
+  --reveal-scale: 0.94;
+}
+
+[data-reveal='blur'] {
+  --reveal-y: 18px;
+  --reveal-blur: 16px;
+}
+
+[data-reveal][data-visible='true'] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* --- Staggered children -------------------------------------------------- */
+
+[data-reveal-stagger='true'] > * {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 720ms var(--ease-out-soft),
+    transform 720ms var(--ease-out-soft);
+}
+
+[data-reveal-stagger='true'][data-visible='true'] > * {
+  opacity: 1;
+  transform: none;
+}
+
+[data-reveal-stagger='true'][data-visible='true'] > *:nth-child(1) {
+  transition-delay: 0ms;
+}
+
+[data-reveal-stagger='true'][data-visible='true'] > *:nth-child(2) {
+  transition-delay: 70ms;
+}
+
+[data-reveal-stagger='true'][data-visible='true'] > *:nth-child(3) {
+  transition-delay: 140ms;
+}
+
+[data-reveal-stagger='true'][data-visible='true'] > *:nth-child(4) {
+  transition-delay: 210ms;
+}
+
+[data-reveal-stagger='true'][data-visible='true'] > *:nth-child(5) {
+  transition-delay: 280ms;
+}
+
+[data-reveal-stagger='true'][data-visible='true'] > *:nth-child(6) {
+  transition-delay: 350ms;
+}
+
+[data-reveal-stagger='true'][data-visible='true'] > *:nth-child(7) {
+  transition-delay: 420ms;
+}
+
+[data-reveal-stagger='true'][data-visible='true'] > *:nth-child(8) {
+  transition-delay: 490ms;
+}
+
+/* --- Hero: composed entrance -------------------------------------------- */
+
+.hero-enter {
+  animation: rise-in 820ms var(--ease-out-soft) both;
+  animation-delay: var(--enter-delay, 0ms);
+}
+
+.hero-enter-clip {
+  animation-name: clip-up;
+  animation-duration: 900ms;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+    filter: blur(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@keyframes clip-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    clip-path: inset(0 0 110% 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 -10% 0);
+  }
+}
+
+.hero-glow {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(72px);
+  opacity: 0.6;
+}
+
+.hero-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--color-brand-charcoal) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-brand-charcoal) 5%, transparent) 1px, transparent 1px);
+  background-size: 58px 58px;
+  mask-image: radial-gradient(78% 62% at 50% 28%, #000 0%, transparent 72%);
+  -webkit-mask-image: radial-gradient(78% 62% at 50% 28%, #000 0%, transparent 72%);
+}
+
+/* --- Scroll-linked parallax (user-driven only) --------------------------- */
+
+[data-parallax] {
+  transform: translate3d(0, var(--parallax-y, 0px), 0);
+}
+
+.parallax-media[data-parallax] {
+  transform: translate3d(0, var(--parallax-y, 0px), 0) scale(1.06);
+}
+
+/* --- Live availability pulse -------------------------------------------- */
+
+.live-dot {
+  position: relative;
+}
+
+.live-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: var(--color-brand-green);
+  animation: live-ping 2000ms cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes live-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.65;
+  }
+
+  70%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* --- Cursor spotlight on cards ------------------------------------------ */
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .spotlight {
+    position: relative;
+  }
+
+  .spotlight::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      280px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+      color-mix(in srgb, var(--color-brand-purple) 16%, transparent),
+      transparent 62%
+    );
+    opacity: 0;
+    transition: opacity 320ms ease;
+    pointer-events: none;
+  }
+
+  .spotlight:hover::after {
+    opacity: 1;
+  }
+}
+
+/* --- Press feedback ------------------------------------------------------ */
+
+@media (prefers-reduced-motion: no-preference) {
+  .press {
+    transition:
+      transform 150ms var(--ease-out-snappy),
+      background-color 200ms ease,
+      color 200ms ease,
+      border-color 200ms ease,
+      box-shadow 220ms ease;
+  }
+
+  .press:active {
+    transform: scale(0.97);
+  }
+}
+
+/* --- Button sheen -------------------------------------------------------- */
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .btn-sheen {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-sheen::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -70%;
+    width: 45%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    transform: skewX(-16deg);
+    pointer-events: none;
+  }
+
+  .btn-sheen:hover::after {
+    animation: sheen-sweep 720ms var(--ease-out-snappy);
+  }
+}
+
+@keyframes sheen-sweep {
+  to {
+    left: 125%;
+  }
+}
+
+/* --- Panel swap (booking tabs) ------------------------------------------ */
+
+.panel-swap {
+  animation: rise-in 440ms var(--ease-out-soft) both;
+}
+
+/* --- Step connector ------------------------------------------------------ */
+
+.steps-grid {
+  position: relative;
+}
+
+.steps-grid::before {
+  content: '';
+  position: absolute;
+  top: 3.75rem;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-brand-border) 18%,
+    var(--color-brand-border) 82%,
+    transparent
+  );
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 900ms var(--ease-out-soft) 160ms;
+  z-index: 0;
+}
+
+.steps-grid[data-visible='true']::before {
+  transform: scaleX(1);
+}
+
+@media (max-width: 767px) {
+  .steps-grid::before {
+    display: none;
+  }
+}
+
+/* --- Checklist tick ------------------------------------------------------ */
+
+.tick-pop {
+  animation: tick-pop 320ms var(--ease-out-soft) both;
+}
+
+@keyframes tick-pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* --- FAQ answer reveal --------------------------------------------------- */
+
+details[open] .faq-answer {
+  animation: rise-in 260ms var(--ease-out-soft) both;
+}
+
+/* --- Page scroll progress ------------------------------------------------ */
+
+.scroll-progress-bar {
+  height: 100%;
+  transform-origin: left center;
+  background: linear-gradient(
+    90deg,
+    var(--color-brand-blue-pastel) 0%,
+    var(--color-brand-purple) 55%,
+    var(--color-brand-green) 100%
+  );
+}
+
+/* --- Reduced motion: keep meaning, drop the theatre ---------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-reveal-stagger='true'] > * {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+
+  .hero-enter,
+  .panel-swap,
+  .tick-pop,
+  details[open] .faq-answer {
+    animation: none !important;
+  }
+
+  .live-dot::after {
+    animation: none !important;
+    display: none;
+  }
+
+  [data-parallax],
+  .parallax-media[data-parallax] {
+    transform: none !important;
+  }
+
+  .steps-grid::before {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .press:active {
+    transform: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}

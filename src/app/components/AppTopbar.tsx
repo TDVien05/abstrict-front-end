@@ -59,13 +59,15 @@ export function AppTopbar({ actor = 'public', registration = false }: AppTopbarP
   if (actor === 'public') {
     return (
       <header className="sticky top-0 z-50 border-b border-brand-border bg-brand-sand/90 backdrop-blur-md">
-        <div className="flex h-20 w-full items-center justify-between px-6 sm:px-8 lg:px-8 xl:px-10 2xl:px-12">
-          <NavLink aria-label="ABSTRICT - Trang chủ" className="group" to="/">
-            <span className="transition-transform duration-200 group-hover:scale-[1.02]">
-              <BrandLogo />
-            </span>
-          </NavLink>
-          <nav aria-label="Điều hướng chính" className="hidden items-center gap-5 text-[14px] font-medium text-brand-muted lg:gap-7 lg:text-[15px] xl:gap-9 md:flex">
+        <div className="flex h-20 w-full items-center gap-3 px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
+          <div className="flex flex-1 items-center">
+            <NavLink aria-label="ABSTRICT - Trang chủ" className="group" to="/">
+              <span className="transition-transform duration-200 group-hover:scale-[1.02]">
+                <BrandLogo size="md" />
+              </span>
+            </NavLink>
+          </div>
+          <nav aria-label="Điều hướng chính" className="hidden items-center gap-3 text-[13px] font-medium text-brand-muted lg:flex xl:gap-6 xl:text-[14.5px]">
             {navByActor.public.map((item) => (
               <a className="transition-colors hover:text-brand-charcoal" href={item.to} key={item.to}>
                 {item.label}
@@ -73,11 +75,11 @@ export function AppTopbar({ actor = 'public', registration = false }: AppTopbarP
             ))}
             <Link className="transition-colors hover:text-brand-charcoal" to="/partners/register">Trở thành đối tác</Link>
           </nav>
-          <div className="flex items-center gap-2 sm:gap-4">
-            <NavLink className="hidden px-2 py-2 text-[15px] font-semibold text-brand-charcoal transition-opacity hover:opacity-70 sm:block sm:px-3" to="/login">
+          <div className="flex flex-1 items-center justify-end gap-2 sm:gap-3">
+            <NavLink className="press hidden px-2 py-2 text-[14px] font-semibold text-brand-charcoal transition-opacity hover:opacity-70 xl:block xl:px-3" to="/login">
               Đăng nhập
             </NavLink>
-            <NavLink className="inline-flex items-center justify-center rounded-xl bg-brand-charcoal px-3 py-2.5 text-[15px] font-semibold text-white shadow-sm transition-colors hover:bg-black sm:px-5" to="/register">
+            <NavLink className="press inline-flex items-center justify-center rounded-xl bg-brand-charcoal px-4 py-2.5 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-black sm:px-5" to="/register">
               Đặt lịch ngay
             </NavLink>
           </div>
