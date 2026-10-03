@@ -1,5 +1,6 @@
 node_modules
 dist
+.vercel
 .env
 .env.local
 .env.*
@@ -11,3 +12,6 @@ dist
 !.vscode/extensions.json
 .stitch-reference
 .commandcode
+
+.vercel
+.env*

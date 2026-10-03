@@ -9,10 +9,12 @@ import {
   TransparentWorkflowSection,
   TrustAndFaqSection,
 } from '../../features/landing/components/LandingSections'
+import { ScrollProgress } from '../../shared/ui/ScrollProgress'
 
 export function HomePage() {
   return (
     <>
+      <ScrollProgress />
       <main className="flex-grow">
         <HeroSection />
         <ServicesSection />

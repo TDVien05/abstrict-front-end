@@ -1,18 +1,22 @@
-import { useEffect, useRef, useState, type PropsWithChildren } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type PropsWithChildren } from 'react'
+
+type RevealVariant = 'up' | 'soft' | 'left' | 'right' | 'scale' | 'blur'
 
 interface RevealProps extends PropsWithChildren {
   className?: string
   delay?: number
+  variant?: RevealVariant
+  stagger?: boolean
 }
 
-export function Reveal({ children, className = '', delay = 0 }: RevealProps) {
+export function Reveal({ children, className = '', delay = 0, variant = 'up', stagger = false }: RevealProps) {
   const elementRef = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
     const element = elementRef.current
 
-    if (!element || !('IntersectionObserver' in window)) {
+    if (!element || typeof IntersectionObserver === 'undefined') {
       setIsVisible(true)
       return
     }
@@ -23,7 +27,7 @@ export function Reveal({ children, className = '', delay = 0 }: RevealProps) {
         setIsVisible(true)
         observer.unobserve(entry.target)
       },
-      { rootMargin: '0px 0px -10% 0px', threshold: 0.08 },
+      { rootMargin: '0px 0px -12% 0px', threshold: 0.1 },
     )
 
     observer.observe(element)
@@ -32,11 +36,12 @@ export function Reveal({ children, className = '', delay = 0 }: RevealProps) {
 
   return (
     <div
-      className={`${className} transition-[opacity,transform] duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transform-none motion-reduce:opacity-100 motion-reduce:transition-none ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
-      }`}
+      className={className}
+      data-reveal={stagger ? undefined : variant}
+      data-reveal-stagger={stagger ? 'true' : undefined}
+      data-visible={isVisible ? 'true' : 'false'}
       ref={elementRef}
-      style={{ transitionDelay: `${delay}ms` }}
+      style={{ '--reveal-delay': `${delay}ms` } as CSSProperties}
     >
       {children}
     </div>
