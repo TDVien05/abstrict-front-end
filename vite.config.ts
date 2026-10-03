@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
       proxy: {
         '/api': {
           changeOrigin: true,
-          target: env.VITE_API_PROXY_TARGET || 'http://localhost:8080',
+          target: env.VITE_API_PROXY_TARGET || 'https://abstrict.api.vientruong.site',
         },
       },
     },
