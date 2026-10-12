@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiFetch, apiRequest } from '../../../shared/api/http-client'
 import { ApiError } from '../../../shared/api/problem-details'
+import type { CustomerAddress } from './addresses'
 
 export interface CustomerAvatar {
   avatarUrl: string
@@ -45,11 +46,13 @@ export interface CustomerProfile {
   phoneNumber: string
   avatarUrl: string | null
   createdAtUtc: string
+  /** Sổ địa chỉ, mặc định đứng đầu. Thêm/sửa/xóa qua /customer/addresses. */
+  addresses: CustomerAddress[]
 }
 
-// TODO(backend): endpoint này chưa có trên server; hợp đồng đề xuất nằm trong docs/CUSTOMER_PROFILE_API.md (mục "Đề xuất").
-export function updateProfile(request: { fullName: string }) {
-  return apiRequest<CustomerProfile>('/customer/profile', { method: 'PUT', body: request })
+// Hồ sơ mới nhất; được tải lại sau khi đổi ảnh đại diện hoặc sổ địa chỉ (cùng tiền tố khóa 'customer').
+export function useCustomerProfile() {
+  return useQuery({ queryKey: ['customer', 'profile'], queryFn: () => apiRequest<CustomerProfile>('/customer/profile'), retry: false })
 }
 
 export function uploadAvatar(file: File) {
