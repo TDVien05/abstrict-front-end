@@ -1,70 +1,117 @@
-import { ArrowRight, BedDouble, Check, CheckCircle2, ClipboardCheck, Clock3, CreditCard, House, Info, MapPin, MessageSquareText, ShieldCheck, ShowerHead, Sofa } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { CheckCircle2, Clock3, ListChecks, MapPin, MessageSquareText, ShieldCheck } from 'lucide-react'
+import { useState } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { bookingErrorMessage } from '../../entities/booking'
+import { useCustomerAddresses } from '../../features/customer/api/addresses'
+import { useBookingQuote, useChecklist, useCreateBooking } from '../../features/customer/api/bookings'
+import { useFreelancer } from '../../features/customer/api/freelancers'
+import { AddressPicker } from '../../features/customer/components/AddressPicker'
 import { CustomerCard, CustomerContainer, StatusPill } from '../../features/customer/components/CustomerPrimitives'
-import { bookingChecklist, maiLanAnhImage, providers, servicePackages } from '../../features/customer/customer-content'
 import { formatVnd } from '../../shared/lib/format-currency'
+import { durationHours, vnDateLabel, vnTimeRange } from '../../shared/lib/vn-time'
 
 interface BookingNavigationState {
-  date?: string
-  endTime?: string
-  serviceId?: string
-  startTime?: string
+  endsAtUtc?: string
+  serviceCode?: string
+  startsAtUtc?: string
 }
-
-const areaIcons = [Sofa, House, BedDouble, ShowerHead]
-const paymentMethods = [{ id: 'momo', label: 'Ví MoMo', mark: 'M' }, { id: 'vietqr', label: 'VietQR / ATM', mark: 'QR' }, { id: 'zalopay', label: 'ZaloPay', mark: 'Z' }, { id: 'card', label: 'Visa / Master', mark: '••' }]
 
 export function BookingCreatePage() {
   const { providerId } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const state = (location.state as BookingNavigationState | null) ?? {}
-  const provider = providers.find((item) => item.id === providerId) ?? providers[0]
-  const service = servicePackages.find((item) => item.id === state.serviceId) ?? servicePackages[0]
-  const startTime = state.startTime ?? '14:00'
-  const endTime = state.endTime ?? '17:00'
-  const duration = useMemo(() => (Number(endTime.slice(0, 2)) * 60 + Number(endTime.slice(3)) - Number(startTime.slice(0, 2)) * 60 - Number(startTime.slice(3))) / 60, [endTime, startTime])
-  const total = service.price * duration
-  const deposit = total * 0.15
-  const [checkedItems, setCheckedItems] = useState(() => new Set(bookingChecklist.flatMap((group) => group.items)))
-  const [paymentMethod, setPaymentMethod] = useState('vietqr')
-  const [note, setNote] = useState('Nhà có 1 bé mèo ngoan, chuông cửa đang hỏng; vui lòng gọi điện khi đến sảnh.')
-  const [message, setMessage] = useState('')
+  const { endsAtUtc, serviceCode, startsAtUtc } = (location.state as BookingNavigationState | null) ?? {}
+  const { data: provider, error, isError, isPending } = useFreelancer(providerId)
+  const { data: addresses } = useCustomerAddresses()
+  const { data: checklist } = useChecklist(serviceCode)
+  const createBooking = useCreateBooking()
+  const [pickedAddressId, setPickedAddressId] = useState<string>()
+  const [optionalItemIds, setOptionalItemIds] = useState<string[]>([])
+  const [note, setNote] = useState('')
 
-  function toggleItem(item: string) {
-    setCheckedItems((current) => {
-      const next = new Set(current)
-      if (next.has(item)) next.delete(item)
-      else next.add(item)
-      return next
-    })
+  const service = provider?.services.find((item) => item.code === serviceCode)
+  // Sổ địa chỉ trả địa chỉ mặc định đứng đầu.
+  const address = addresses?.find((item) => item.id === pickedAddressId) ?? addresses?.[0]
+  const request = provider && service && address && startsAtUtc && endsAtUtc
+    ? { providerId: provider.providerId, serviceCategoryId: service.serviceCategoryId, customerAddressId: address.id, startsAtUtc, endsAtUtc }
+    : null
+  const quote = useBookingQuote(request)
+
+  if (isPending) {
+    return <main className="pb-20"><CustomerContainer className="py-10"><p className="text-sm text-brand-muted" role="status">Đang tải thông tin đặt lịch...</p></CustomerContainer></main>
   }
 
-  function confirmDeposit() {
-    setMessage('Thông tin booking đã sẵn sàng gửi đến API tạo đơn và khởi tạo giao dịch cọc.')
-    window.setTimeout(() => navigate('/orders/HC-241028-09'), 650)
+  if (isError || !provider) {
+    return <main className="pb-20"><CustomerContainer className="py-10"><p className="rounded-xl bg-red-50 p-4 text-sm text-red-700" role="alert">{error ? bookingErrorMessage(error) : 'Không tải được thông tin đối tác.'}</p></CustomerContainer></main>
+  }
+
+  if (!service || !startsAtUtc || !endsAtUtc) {
+    return (
+      <main className="pb-20"><CustomerContainer className="py-10">
+        <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900" role="alert">Chưa có thông tin dịch vụ hoặc thời gian. Vui lòng chọn lại trên hồ sơ đối tác.</p>
+        <Link className="mt-4 inline-flex text-sm font-semibold text-brand-purple" to={`/discover/${provider.providerId}`}>Quay lại hồ sơ {provider.displayName}</Link>
+      </CustomerContainer></main>
+    )
+  }
+
+  const duration = durationHours(startsAtUtc, endsAtUtc)
+  const requiredItems = checklist?.items.filter((item) => item.isRequired) ?? []
+  const optionalItems = checklist?.items.filter((item) => !item.isRequired) ?? []
+
+  function toggleItem(itemId: string) {
+    setOptionalItemIds((current) => current.includes(itemId) ? current.filter((id) => id !== itemId) : [...current, itemId])
+  }
+
+  function submit() {
+    if (!request) return
+    createBooking.mutate(
+      { ...request, checklistItemIds: optionalItemIds, customerNote: note.trim() || undefined },
+      { onSuccess: (booking) => navigate(`/orders/${booking.id}`) },
+    )
   }
 
   return (
     <main className="pb-20">
       <CustomerContainer className="py-7 sm:py-10">
-        <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><div className="flex flex-wrap items-center gap-2"><StatusPill tone="purple">Yêu cầu #AB-2810</StatusPill><StatusPill tone="green">Bảo vệ cọc</StatusPill></div><h1 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-brand-charcoal">Xác nhận đặt dịch vụ & ký quỹ</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-brand-muted">Kiểm tra thời gian, địa chỉ và phạm vi công việc trước khi đặt cọc giữ lịch.</p></div></div>
-
-        <div className="mb-6 grid gap-2 rounded-2xl border border-brand-border bg-white p-3 sm:grid-cols-3">{[['1', 'Chọn công việc', true], ['2', 'Thời gian & địa chỉ', true], ['3', 'Xác nhận & ký cọc', false]].map(([step, label, complete]) => <div className={`flex items-center gap-3 rounded-xl px-4 py-3 ${complete ? 'text-emerald-700' : 'bg-brand-charcoal text-white'}`} key={String(step)}><span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${complete ? 'bg-emerald-100' : 'bg-white/15'}`}>{complete ? <Check className="h-4 w-4" /> : step}</span><span className="text-sm font-semibold">{label}</span></div>)}</div>
+        <div className="mb-6"><StatusPill tone="purple">Xác nhận đặt dịch vụ</StatusPill><h1 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-brand-charcoal">Xác nhận đặt dịch vụ & ký quỹ</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-brand-muted">Chọn địa chỉ, kiểm tra công việc và báo giá trước khi giữ chỗ.</p></div>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-5">
-            <CustomerCard className="p-5 sm:p-6"><div className="flex flex-col gap-5 sm:flex-row sm:items-center"><img alt={provider.name} className="h-16 w-16 rounded-full object-cover object-top" src={provider.image ?? maiLanAnhImage} /><div className="flex-1"><div className="flex items-center gap-2"><h2 className="font-semibold text-brand-charcoal">{provider.name}</h2><CheckCircle2 className="h-4 w-4 text-emerald-600" /></div><p className="mt-1 text-xs text-brand-muted">ABSTRICT Pro · {provider.rating}★ · {provider.reviews} ca hoàn tất</p></div><div className="text-left sm:text-right"><p className="text-xs text-brand-muted">Đơn giá niêm yết</p><strong className="text-lg">{formatVnd(service.price)}<span className="text-xs font-normal text-brand-muted">/giờ</span></strong></div></div><div className="mt-5 grid gap-3 border-t border-brand-border pt-5 sm:grid-cols-2"><div className="flex gap-3 rounded-xl bg-[#f7f8fa] p-4"><Clock3 className="h-5 w-5 text-brand-purple" /><div><p className="text-xs text-brand-muted">Thời gian thực hiện</p><p className="mt-1 text-sm font-semibold">{startTime} – {endTime} · {duration} giờ</p><p className="text-xs text-brand-muted">Ngày {state.date ?? '28/10'}</p></div></div><div className="flex gap-3 rounded-xl bg-[#f7f8fa] p-4"><MapPin className="h-5 w-5 text-brand-purple" /><div><p className="text-xs text-brand-muted">Địa chỉ căn hộ</p><p className="mt-1 text-sm font-semibold">S5.03, tầng 18</p><p className="text-xs text-brand-muted">Vinhomes Grand Park, TP. Thủ Đức</p></div></div></div></CustomerCard>
+            <CustomerCard className="p-5 sm:p-6"><div className="flex flex-col gap-5 sm:flex-row sm:items-center"><div className="flex-1"><div className="flex items-center gap-2"><h2 className="font-semibold text-brand-charcoal">{provider.displayName}</h2><CheckCircle2 className="h-4 w-4 text-emerald-600" /></div><p className="mt-1 text-xs text-brand-muted">{provider.averageRating}★ · {provider.completedBookingCount} ca hoàn tất</p></div><div className="text-left sm:text-right"><p className="text-xs text-brand-muted">{service.name}</p><strong className="text-lg">{formatVnd(service.hourlyRateVnd)}<span className="text-xs font-normal text-brand-muted">/giờ</span></strong></div></div><div className="mt-5 flex gap-3 rounded-xl bg-[#f7f8fa] p-4"><Clock3 className="h-5 w-5 text-brand-purple" /><div><p className="text-xs text-brand-muted">Thời gian thực hiện</p><p className="mt-1 text-sm font-semibold">{vnTimeRange(startsAtUtc, endsAtUtc)} · {duration} giờ</p><p className="text-xs text-brand-muted first-letter:uppercase">{vnDateLabel(startsAtUtc)}</p></div></div></CustomerCard>
 
-            <CustomerCard className="p-5 sm:p-6"><div className="flex items-center justify-between"><div><p className="flex items-center gap-2 text-lg font-semibold"><ClipboardCheck className="h-5 w-5 text-brand-purple" />Checklist đã thống nhất</p><p className="mt-1 text-xs text-brand-muted">{checkedItems.size} hạng mục đang được chọn</p></div><StatusPill tone="green">Có thể chỉnh sửa</StatusPill></div><div className="mt-5 space-y-4">{bookingChecklist.map((group, groupIndex) => { const Icon = areaIcons[groupIndex]; const selectedCount = group.items.filter((item) => checkedItems.has(item)).length; return <section className="rounded-xl border border-brand-border p-4" key={group.area}><div className="flex items-center justify-between gap-3"><h3 className="flex items-center gap-2 text-sm font-semibold"><Icon className="h-4 w-4 text-brand-purple" />{groupIndex + 1}. {group.area}</h3><span className="text-xs font-semibold text-emerald-700">{selectedCount}/{group.items.length} mục</span></div><div className="mt-3 space-y-2">{group.items.map((item) => <label className="flex cursor-pointer items-start gap-2.5 text-sm text-brand-muted" key={item}><input checked={checkedItems.has(item)} className="mt-1 h-4 w-4 accent-brand-purple" onChange={() => toggleItem(item)} type="checkbox" /><span>{item}</span></label>)}</div></section> })}</div></CustomerCard>
+            <CustomerCard className="p-5 sm:p-6"><h2 className="flex items-center gap-2 text-sm font-semibold"><MapPin className="h-4 w-4 text-brand-purple" />Địa chỉ thực hiện</h2><AddressPicker onSelect={setPickedAddressId} selectedId={address?.id} /></CustomerCard>
 
-            <CustomerCard className="p-5 sm:p-6"><label className="block"><span className="flex items-center gap-2 text-sm font-semibold"><MessageSquareText className="h-4 w-4 text-brand-purple" />Ghi chú riêng cho {provider.name}</span><textarea className="mt-3 min-h-24 w-full resize-y rounded-xl border border-brand-border bg-[#f7f8fa] p-3 text-sm leading-6 outline-none focus:border-brand-charcoal" onChange={(event) => setNote(event.target.value)} value={note} /></label></CustomerCard>
+            {checklist && checklist.items.length > 0 ? (
+              <CustomerCard className="p-5 sm:p-6">
+                <h2 className="flex items-center gap-2 text-sm font-semibold"><ListChecks className="h-4 w-4 text-brand-purple" />Công việc trong ca</h2>
+                <p className="mt-1 text-xs text-brand-muted">Các mục tùy chọn không làm thay đổi giá.</p>
+                <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+                  {requiredItems.map((item) => <li className="flex gap-2 text-sm text-brand-charcoal" key={item.id}><CheckCircle2 aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" /><span><span className="text-brand-muted">{item.areaName}: </span>{item.description}</span></li>)}
+                  {optionalItems.map((item) => <li key={item.id}><label className="flex cursor-pointer gap-2 text-sm text-brand-charcoal"><input checked={optionalItemIds.includes(item.id)} className="mt-0.5 h-4 w-4 shrink-0 accent-brand-charcoal" onChange={() => toggleItem(item.id)} type="checkbox" /><span><span className="text-brand-muted">{item.areaName}: </span>{item.description}</span></label></li>)}
+                </ul>
+              </CustomerCard>
+            ) : null}
 
-            <div className="flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900"><Info className="mt-0.5 h-5 w-5 shrink-0" /><p><strong>Phạm vi công việc minh bạch:</strong> Công việc ngoài checklist cần tạo đề nghị gia hạn và được cả hai bên đồng ý trước khi thực hiện.</p></div>
+            <CustomerCard className="p-5 sm:p-6"><label className="block"><span className="flex items-center gap-2 text-sm font-semibold"><MessageSquareText className="h-4 w-4 text-brand-purple" />Ghi chú riêng cho {provider.displayName}</span><textarea className="mt-3 min-h-24 w-full resize-y rounded-xl border border-brand-border bg-[#f7f8fa] p-3 text-sm leading-6 outline-none focus:border-brand-charcoal" onChange={(event) => setNote(event.target.value)} placeholder="Thú cưng, lưu ý khi đến..." value={note} /></label></CustomerCard>
           </div>
 
-          <aside className="lg:sticky lg:top-24 lg:h-fit"><CustomerCard className="p-5 sm:p-6"><h2 className="text-xl font-semibold tracking-[-0.02em]">Tóm tắt thanh toán</h2><div className="mt-5 space-y-3 text-sm"><div className="flex justify-between gap-4"><span className="text-brand-muted">Chi phí ca ({duration} giờ × {formatVnd(service.price)})</span><span>{formatVnd(total)}</span></div><div className="flex justify-between"><span className="text-brand-muted">Dụng cụ & chất tẩy rửa</span><span>0 ₫</span></div><div className="flex justify-between border-t border-brand-border pt-3 font-semibold"><span>Tổng giá trị ca</span><span>{formatVnd(total)}</span></div></div><div className="mt-5 rounded-xl bg-brand-50 p-4"><div className="flex justify-between text-sm font-semibold text-brand-700"><span>Cọc giữ lịch (15%)</span><span>{formatVnd(deposit)}</span></div><div className="mt-2 flex justify-between text-xs text-brand-muted"><span>Thanh toán sau nghiệm thu</span><span>{formatVnd(total - deposit)}</span></div></div><div className="mt-5 flex gap-2 rounded-xl bg-emerald-50 p-3 text-xs leading-5 text-emerald-800"><ShieldCheck className="h-4 w-4 shrink-0" /><span>Miễn phí hủy trước giờ làm tối thiểu 2 giờ. Chính sách cuối cùng do API trả về khi tạo booking.</span></div><fieldset className="mt-5"><legend className="text-xs font-semibold text-brand-muted">Phương thức thanh toán cọc</legend><div className="mt-2 grid grid-cols-2 gap-2">{paymentMethods.map((method) => <button className={`flex items-center gap-2 rounded-xl border p-3 text-left text-xs font-semibold ${paymentMethod === method.id ? 'border-brand-purple bg-brand-50 text-brand-700' : 'border-brand-border text-brand-muted'}`} key={method.id} onClick={() => setPaymentMethod(method.id)} type="button"><span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-[10px] font-semibold text-brand-charcoal shadow-sm">{method.mark}</span>{method.label}</button>)}</div></fieldset><button className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-charcoal px-4 text-sm font-semibold text-white hover:bg-black" onClick={confirmDeposit} type="button"><CreditCard className="h-4 w-4" />Thanh toán cọc {formatVnd(deposit)} <ArrowRight className="h-4 w-4" /></button>{message ? <p className="mt-3 rounded-xl bg-brand-blue-pastel-soft p-3 text-xs leading-5 text-brand-blue-ink" role="status">{message}</p> : null}<p className="mt-4 text-center text-xs text-brand-muted">Đối tác dự kiến phản hồi trong vòng 10 phút</p></CustomerCard></aside>
+          <aside className="lg:sticky lg:top-24 lg:h-fit">
+            <CustomerCard className="p-5 sm:p-6">
+              <h2 className="text-xl font-semibold tracking-[-0.02em]">Tóm tắt thanh toán</h2>
+              {quote.data ? (
+                <div className="mt-5 space-y-3 text-sm">
+                  <div className="flex justify-between gap-4"><span className="text-brand-muted">Chi phí ca ({quote.data.durationMinutes / 60} giờ × {formatVnd(quote.data.unitPriceVnd)})</span><span>{formatVnd(quote.data.baseAmountVnd)}</span></div>
+                  {quote.data.surchargeAmountVnd > 0 ? <div className="flex justify-between gap-4"><span className="text-brand-muted">Phụ phí</span><span>{formatVnd(quote.data.surchargeAmountVnd)}</span></div> : null}
+                  <div className="flex justify-between border-t border-brand-border pt-3 font-semibold"><span>Đặt cọc ngay ({quote.data.depositPercent}%)</span><span>{formatVnd(quote.data.depositAmountVnd)}</span></div>
+                  <div className="flex justify-between gap-4"><span className="text-brand-muted">Thanh toán sau khi hoàn thành</span><span>{formatVnd(quote.data.remainingAmountVnd)}</span></div>
+                </div>
+              ) : quote.isError ? <p className="mt-5 rounded-xl bg-red-50 p-3 text-sm text-red-700" role="alert">{bookingErrorMessage(quote.error)}</p>
+                : <p className="mt-5 text-sm text-brand-muted" role="status">{address ? 'Đang lấy báo giá...' : 'Chọn địa chỉ để nhận báo giá.'}</p>}
+              <div className="mt-5 flex gap-2 rounded-xl bg-emerald-50 p-3 text-xs leading-5 text-emerald-800"><ShieldCheck className="h-4 w-4 shrink-0" /><span>Sau khi đặt, chỗ được giữ {quote.data?.holdMinutes ?? 15} phút để bạn thanh toán cọc.</span></div>
+              {createBooking.isError ? <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700" role="alert">{bookingErrorMessage(createBooking.error)}</p> : null}
+              <button className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-brand-charcoal px-4 text-sm font-semibold text-white hover:bg-black disabled:cursor-not-allowed disabled:opacity-50" disabled={!quote.data || createBooking.isPending} onClick={submit} type="button">{createBooking.isPending ? 'Đang giữ chỗ...' : 'Đặt lịch & giữ chỗ'}</button>
+            </CustomerCard>
+          </aside>
         </div>
       </CustomerContainer>
     </main>

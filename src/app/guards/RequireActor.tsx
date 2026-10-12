@@ -8,8 +8,12 @@ interface RequireActorProps extends PropsWithChildren {
 }
 
 export function RequireActor({ allow, children }: RequireActorProps) {
-  const { hasActor, isAuthenticated } = useAuth()
+  const { hasActor, isAuthenticated, isRestoring } = useAuth()
   const location = useLocation()
+
+  if (isRestoring) {
+    return <p className="p-10 text-center text-sm text-brand-muted" role="status">Đang khôi phục phiên đăng nhập...</p>
+  }
 
   if (!isAuthenticated) {
     return <Navigate replace state={{ from: location }} to="/login" />

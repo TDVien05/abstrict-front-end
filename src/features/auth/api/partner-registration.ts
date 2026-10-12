@@ -1,7 +1,5 @@
 import { apiRequest } from '../../../shared/api/http-client'
 
-const FREELANCER_AUTH_BASE = '/auth/freelancers'
-
 export interface RegisterPartnerRequest {
   fullName: string
   phoneNumber: string
@@ -30,57 +28,32 @@ export interface PartnerPhoneVerificationResponse {
   phoneVerifiedAtUtc: string
 }
 
-export interface PartnerLoginRequest {
-  phoneNumber: string
-  password: string
-}
-
-export type PartnerOnboardingStatus = 'Draft' | 'Submitted' | 'UnderReview' | 'ChangesRequested' | 'Approved' | 'Rejected'
-export type PartnerOnboardingStep = 'Personal' | 'Identity' | 'SupportingDocuments' | 'SkillsAndBank'
-
-export interface PartnerLoginResponse {
-  accessToken: string
-  tokenType: 'Bearer'
-  expiresAtUtc: string
-  userId: string
-  fullName: string
-  phoneNumber: string
-  role: string
-  onboardingStatus: PartnerOnboardingStatus
-  currentStep: PartnerOnboardingStep
-}
-
-export const partnerOnboardingStepAnchors: Record<PartnerOnboardingStep, string> = {
-  Personal: 'kyc-1',
-  Identity: 'kyc-2',
-  SupportingDocuments: 'kyc-3',
-  SkillsAndBank: 'kyc-4',
-}
-
+// Freelancer đăng nhập qua /auth/login chung (xem customer-session.ts); chỉ bước đăng ký có đường dẫn riêng.
 export function registerPartner(request: RegisterPartnerRequest) {
-  return apiRequest<PartnerRegistrationResponse>(`${FREELANCER_AUTH_BASE}/register`, {
+  return apiRequest<PartnerRegistrationResponse>('/auth/register-freelancer', {
+    method: 'POST',
+    body: request,
+  })
+}
+
+// fullName là họ tên người quản lý tài khoản doanh nghiệp.
+export function registerCompany(request: RegisterPartnerRequest) {
+  return apiRequest<PartnerRegistrationResponse>('/auth/register-company', {
     method: 'POST',
     body: request,
   })
 }
 
 export function verifyPartnerPhoneOtp(request: VerifyPartnerOtpRequest) {
-  return apiRequest<PartnerPhoneVerificationResponse>(`${FREELANCER_AUTH_BASE}/verify-phone-otp`, {
+  return apiRequest<PartnerPhoneVerificationResponse>('/auth/verify-phone-otp', {
     method: 'POST',
     body: request,
   })
 }
 
 export function resendPartnerPhoneOtp(challengeId: string) {
-  return apiRequest<PartnerRegistrationResponse>(`${FREELANCER_AUTH_BASE}/resend-phone-otp`, {
+  return apiRequest<PartnerRegistrationResponse>('/auth/resend-phone-otp', {
     method: 'POST',
     body: { challengeId },
-  })
-}
-
-export function loginPartner(request: PartnerLoginRequest) {
-  return apiRequest<PartnerLoginResponse>(`${FREELANCER_AUTH_BASE}/login`, {
-    method: 'POST',
-    body: request,
   })
 }

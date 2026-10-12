@@ -1,7 +1,9 @@
-import { Bell, ChevronDown, Search } from 'lucide-react'
+import { Bell, Search } from 'lucide-react'
 import { NavLink, Link } from 'react-router-dom'
 import type { Actor } from '../../entities/auth'
+import { useAuth } from '../../features/auth/auth-context'
 import { BrandLogo } from '../../shared/ui/BrandLogo'
+import { AccountMenu } from './AccountMenu'
 
 interface AppTopbarProps {
   actor?: Actor | 'public'
@@ -29,8 +31,8 @@ const navByActor: Record<Actor | 'public', { label: string; to: string }[]> = {
     { label: 'Gói hiển thị', to: '/partner/plans' },
   ],
   company: [
+    { label: 'Hồ sơ doanh nghiệp', to: '/partner/company/onboarding' },
     { label: 'Tổng quan', to: '/partner/dashboard' },
-    { label: 'Đơn đặt lịch', to: '/partner/orders' },
     { label: 'Gói hiển thị', to: '/partner/plans' },
   ],
   admin: [
@@ -40,6 +42,10 @@ const navByActor: Record<Actor | 'public', { label: string; to: string }[]> = {
 }
 
 export function AppTopbar({ actor = 'public', registration = false }: AppTopbarProps) {
+  const { user } = useAuth()
+  // Người đã đăng nhập luôn thấy menu tài khoản, kể cả trên các trang công khai.
+  const accountMenu = <AccountMenu roleLabel={user?.actor === 'admin' ? 'Quản trị viên' : user?.actor === 'customer' ? 'Khách hàng' : 'Đối tác'} />
+
   if (registration) {
     return (
       <header className="sticky top-0 z-40 border-b border-brand-border bg-white/95 backdrop-blur-xl">
@@ -50,7 +56,7 @@ export function AppTopbar({ actor = 'public', registration = false }: AppTopbarP
             <a className="rounded-lg px-3 py-2 text-brand-muted hover:bg-brand-sand" href="mailto:support@abstrict.vn">Hỗ trợ</a>
           </nav>
           <div className="flex items-center gap-3">
-            <NavLink className="rounded-lg bg-brand-charcoal px-3 py-2 text-sm font-semibold text-white hover:bg-black" to="/partners/login">Đăng nhập</NavLink>
+            {user ? accountMenu : <NavLink className="rounded-lg bg-brand-charcoal px-3 py-2 text-sm font-semibold text-white hover:bg-black" to="/partners/login">Đăng nhập</NavLink>}
           </div>
         </div>
       </header>
@@ -76,12 +82,12 @@ export function AppTopbar({ actor = 'public', registration = false }: AppTopbarP
             <Link className="transition-colors hover:text-brand-charcoal" to="/partners/register">Trở thành đối tác</Link>
           </nav>
           <div className="flex flex-1 items-center justify-end gap-2 sm:gap-3">
-            <NavLink className="press hidden px-2 py-2 text-[14px] font-semibold text-brand-charcoal transition-opacity hover:opacity-70 xl:block xl:px-3" to="/login">
+            {user ? accountMenu : <><NavLink className="press hidden px-2 py-2 text-[14px] font-semibold text-brand-charcoal transition-opacity hover:opacity-70 xl:block xl:px-3" to="/login">
               Đăng nhập
             </NavLink>
             <NavLink className="press inline-flex items-center justify-center rounded-xl bg-brand-charcoal px-4 py-2.5 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-black sm:px-5" to="/register">
               Đặt lịch ngay
-            </NavLink>
+            </NavLink></>}
           </div>
         </div>
       </header>
@@ -91,7 +97,7 @@ export function AppTopbar({ actor = 'public', registration = false }: AppTopbarP
   if (actor === 'customer') {
     return (
       <header className="sticky top-0 z-40 border-b border-brand-border bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="flex min-h-16 w-full items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
           <div className="flex min-w-0 items-center gap-5 lg:gap-8">
             <NavLink aria-label="ABSTRICT - Trang chủ" className="shrink-0" to="/discover"><BrandLogo size="sm" /></NavLink>
             <nav aria-label="Điều hướng khách hàng" className="hidden items-center gap-1 md:flex">
@@ -105,7 +111,7 @@ export function AppTopbar({ actor = 'public', registration = false }: AppTopbarP
             <label className="relative hidden lg:block"><span className="sr-only">Tìm kiếm</span><Search aria-hidden="true" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" /><input className="h-9 w-60 rounded-xl bg-slate-100 pl-9 pr-3 text-xs outline-none transition focus:bg-white focus:ring-1 focus:ring-brand-charcoal" placeholder="Tìm căn hộ, ca làm việc..." /></label>
             <button aria-label="Thông báo" className="relative rounded-lg p-2 text-brand-muted hover:bg-slate-100 hover:text-brand-charcoal" type="button"><Bell aria-hidden="true" className="h-[18px] w-[18px]" /><span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white" /></button>
             <span className="hidden h-5 w-px bg-brand-border sm:block" />
-            <button className="flex items-center gap-2 rounded-xl p-1.5 hover:bg-slate-50" type="button"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-purple text-xs font-semibold text-white">TH</span><span className="hidden text-left sm:block"><span className="block text-xs font-semibold leading-4">Nguyễn Thu Hà</span><span className="block text-[10px] text-brand-muted">Khách hàng Pro</span></span><ChevronDown aria-hidden="true" className="hidden h-4 w-4 text-brand-muted sm:block" /></button>
+            {accountMenu}
           </div>
         </div>
       </header>
@@ -114,7 +120,7 @@ export function AppTopbar({ actor = 'public', registration = false }: AppTopbarP
 
   return (
     <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex min-h-16 max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-3 lg:px-8">
+      <div className="flex min-h-16 w-full flex-wrap items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-3">
         <NavLink aria-label="ABSTRICT - Trang chủ" to="/">
           <BrandLogo />
         </NavLink>
@@ -133,6 +139,7 @@ export function AppTopbar({ actor = 'public', registration = false }: AppTopbarP
             </NavLink>
           ))}
         </nav>
+        {accountMenu}
       </div>
     </header>
   )

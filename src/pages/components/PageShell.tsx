@@ -9,7 +9,7 @@ interface PageShellProps extends PropsWithChildren {
 
 export function PageShell({ actions, children, description, eyebrow, title }: PageShellProps) {
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-6 py-16 sm:py-20 lg:py-28">
+    <main className="w-full px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-16 sm:py-20 lg:py-28">
       <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
         <div className="max-w-3xl">
           {eyebrow ? <p className="mb-4 text-base font-semibold text-brand-purple">{eyebrow}</p> : null}
