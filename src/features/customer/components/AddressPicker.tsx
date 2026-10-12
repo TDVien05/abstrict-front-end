@@ -52,7 +52,8 @@ function AddressForm({ address, onDone }: { address?: CustomerAddress; onDone: (
   )
 }
 
-export function AddressPicker({ onSelect, selectedId }: { onSelect: (addressId: string) => void; selectedId: string | undefined }) {
+// Không truyền onSelect thì đây là sổ địa chỉ chỉ để quản lý (trang hồ sơ), không có ô chọn.
+export function AddressPicker({ onSelect, selectedId }: { onSelect?: (addressId: string) => void; selectedId?: string }) {
   const { data: addresses, error, isError, isPending } = useCustomerAddresses()
   const remove = useDeleteCustomerAddress()
   const [editing, setEditing] = useState<CustomerAddress | 'new' | null>(null)
@@ -62,24 +63,24 @@ export function AddressPicker({ onSelect, selectedId }: { onSelect: (addressId: 
 
   return (
     <div className="mt-4">
-      {addresses.length === 0 && editing === null ? <p className="text-sm text-brand-muted">Bạn chưa lưu địa chỉ nào. Thêm địa chỉ để nhận báo giá.</p> : null}
+      {addresses.length === 0 && editing === null ? <p className="text-sm text-brand-muted">{onSelect ? 'Bạn chưa lưu địa chỉ nào. Thêm địa chỉ để nhận báo giá.' : 'Bạn chưa lưu địa chỉ nào.'}</p> : null}
       <ul className="space-y-3">
         {addresses.map((address) => {
           const selected = address.id === selectedId
           return (
             <li className={`rounded-xl border p-4 ${selected ? 'border-brand-purple bg-brand-50/50' : 'border-brand-border'}`} key={address.id}>
-              <label className="flex cursor-pointer gap-3">
-                <input checked={selected} className="mt-1 h-4 w-4 accent-brand-charcoal" name="booking-address" onChange={() => onSelect(address.id)} type="radio" />
+              <label className={`flex gap-3 ${onSelect ? 'cursor-pointer' : ''}`}>
+                {onSelect ? <input checked={selected} className="mt-1 h-4 w-4 accent-brand-charcoal" name="booking-address" onChange={() => onSelect(address.id)} type="radio" /> : null}
                 <span className="min-w-0 flex-1"><span className="flex flex-wrap items-center gap-2 text-sm font-semibold text-brand-charcoal"><MapPin aria-hidden="true" className="h-4 w-4 text-brand-purple" />{address.label}{address.isDefault ? <StatusPill tone="purple">Mặc định</StatusPill> : null}</span><span className="mt-1 block text-sm leading-6 text-brand-muted">{formatAddress(address)}</span>{address.accessInstructions ? <span className="block text-xs text-brand-muted">Ghi chú: {address.accessInstructions}</span> : null}</span>
               </label>
-              <div className="mt-2 flex gap-4 pl-7 text-xs font-semibold"><button className="text-brand-purple hover:underline" onClick={() => setEditing(address)} type="button">Sửa</button><button className="text-red-700 hover:underline disabled:opacity-50" disabled={remove.isPending} onClick={() => remove.mutate(address.id)} type="button">Xóa</button></div>
+              <div className={`mt-2 flex gap-4 text-xs font-semibold ${onSelect ? 'pl-7' : ''}`}><button className="text-brand-purple hover:underline" onClick={() => setEditing(address)} type="button">Sửa</button><button className="text-red-700 hover:underline disabled:opacity-50" disabled={remove.isPending} onClick={() => remove.mutate(address.id)} type="button">Xóa</button></div>
             </li>
           )
         })}
       </ul>
       {remove.isError ? <p className="mt-3 text-xs text-red-700" role="alert">{bookingErrorMessage(remove.error)}</p> : null}
       {editing !== null
-        ? <AddressForm address={editing === 'new' ? undefined : editing} key={editing === 'new' ? 'new' : editing.id} onDone={(saved) => { if (saved) onSelect(saved.id); setEditing(null) }} />
+        ? <AddressForm address={editing === 'new' ? undefined : editing} key={editing === 'new' ? 'new' : editing.id} onDone={(saved) => { if (saved) onSelect?.(saved.id); setEditing(null) }} />
         : addresses.length < 10 ? <button className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-purple hover:underline" onClick={() => setEditing('new')} type="button"><Plus aria-hidden="true" className="h-4 w-4" />Thêm địa chỉ mới</button> : null}
     </div>
   )

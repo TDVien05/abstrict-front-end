@@ -26,7 +26,9 @@ export interface CatalogServiceArea {
   isActive: boolean
 }
 
-const addressesKey = ['customer', 'addresses']
+// Hồ sơ khách hàng cũng chứa sổ địa chỉ, nên mọi thay đổi làm mới cả nhóm khóa 'customer'.
+const customerKey = ['customer']
+const addressesKey = [...customerKey, 'addresses']
 
 export function formatAddress(address: CustomerAddress) {
   return [address.apartmentNumber, address.buildingName, address.streetAddress, address.ward, address.district, address.city].filter(Boolean).join(', ')
@@ -47,7 +49,7 @@ export function useSaveCustomerAddress() {
       id
         ? apiRequest<CustomerAddress>(`/customer/addresses/${encodeURIComponent(id)}`, { method: 'PUT', body: request })
         : apiRequest<CustomerAddress>('/customer/addresses', { method: 'POST', body: request }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: addressesKey }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: customerKey }),
   })
 }
 
@@ -55,6 +57,6 @@ export function useDeleteCustomerAddress() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => apiRequest<void>(`/customer/addresses/${encodeURIComponent(id)}`, { method: 'DELETE' }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: addressesKey }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: customerKey }),
   })
 }
