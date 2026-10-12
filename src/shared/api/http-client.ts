@@ -7,9 +7,16 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
   body?: unknown
 }
 
-export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+// Access token sống ngắn; khi gặp 401, handler này dùng cookie refresh để lấy token mới rồi request được gửi lại một lần.
+let renewSession: (() => Promise<boolean>) | null = null
+
+export function setSessionRenewer(renewer: (() => Promise<boolean>) | null) {
+  renewSession = renewer
+}
+
+function send(url: string, options: RequestOptions) {
   const headers = new Headers(options.headers)
-  headers.set('Accept', 'application/json')
+  if (!headers.has('Accept')) headers.set('Accept', 'application/json')
   const accessToken = getAccessToken()
   if (accessToken) {
     headers.set('Authorization', `Bearer ${accessToken}`)
@@ -21,23 +28,40 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     headers.set('Content-Type', 'application/json')
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  return fetch(url, {
     ...options,
     credentials: 'include',
     headers,
     body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
   })
+}
+
+export async function apiFetch(url: string, options: RequestOptions = {}): Promise<Response> {
+  let response = await send(url, options)
+  if (response.status === 401 && renewSession && !url.includes('/auth/') && (await renewSession())) {
+    response = await send(url, options)
+  }
 
   if (!response.ok) {
     const problem = await readProblemDetails(response)
     throw new ApiError(response.status, problem)
   }
 
+  return response
+}
+
+export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const response = await apiFetch(`${API_BASE_URL}${path}`, options)
+
   if (response.status === 204) {
     return undefined as T
   }
 
   return (await response.json()) as T
+}
+
+export async function apiBlob(path: string): Promise<Blob> {
+  return (await apiFetch(`${API_BASE_URL}${path}`, { headers: { Accept: '*/*' } })).blob()
 }
 
 async function readProblemDetails(response: Response): Promise<ApiProblemDetails> {

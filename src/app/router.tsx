@@ -7,8 +7,8 @@ import { PartnerLayout } from './layouts/PartnerLayout'
 import { PublicLayout } from './layouts/PublicLayout'
 import { RootLayout } from './layouts/RootLayout'
 import { RouteTransition } from '../shared/ui/RouteTransition'
-import { AdminApprovalsPage, AdminDisputesPage } from '../pages/admin/AdminPages'
-import { BookingCreatePage, CustomerDiscoveryPage, CustomerProviderPage, OrderDetailPage, OrdersPage } from '../pages/customer/CustomerPages'
+import { AdminCompaniesPage, AdminCompanyDetailPage, AdminDisputesPage } from '../pages/admin/AdminPages'
+import { BookingCreatePage, CustomerDiscoveryPage, CustomerProviderPage, OrderDetailPage, OrdersPage, ProfilePage } from '../pages/customer/CustomerPages'
 import {
   PartnerAvailabilityPage,
   PartnerDashboardPage,
@@ -19,7 +19,7 @@ import {
 import { DiscoveryPage } from '../pages/public/DiscoveryPage'
 import { HomePage } from '../pages/public/HomePage'
 import { OtpVerificationPage, PartnerSignInPage, PartnerSignUpPage, SignInPage, SignUpPage } from '../pages/public/AuthPages'
-import { PartnerCompanyPage } from '../pages/partner/PartnerCompanyPage'
+import { CompanyOnboardingPage } from '../pages/partner/CompanyOnboardingPage'
 import { PartnerTypeChoicePage } from '../pages/partner/PartnerTypeChoicePage'
 import {
   ForbiddenPage,
@@ -37,6 +37,7 @@ export const router = createBrowserRouter([
       { path: 'register', element: <RouteTransition><SignUpPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
       { path: 'verify-otp', element: <RouteTransition><OtpVerificationPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
       { path: 'partners/register/freelancer', element: <RouteTransition><PartnerSignUpPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
+      { path: 'partners/register/company', element: <RouteTransition><PartnerSignUpPage kind="company" /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
       { path: 'partners/login', element: <RouteTransition><PartnerSignInPage /></RouteTransition>, errorElement: <RouteErrorBoundary /> },
       {
         element: <PublicLayout />,
@@ -46,7 +47,6 @@ export const router = createBrowserRouter([
           { path: 'partners', element: <DiscoveryPage /> },
           { path: 'partners/register', element: <PartnerTypeChoicePage /> },
           { path: 'partners/register/kyc', element: <PartnerRegistrationPage /> },
-          { path: 'partners/register/company', element: <PartnerCompanyPage /> },
           { path: 'partners/:id', element: <ProviderProfilePage /> },
           { path: 'forbidden', element: <ForbiddenPage /> },
         ],
@@ -64,6 +64,7 @@ export const router = createBrowserRouter([
           { path: 'book/:providerId', element: <BookingCreatePage /> },
           { path: 'orders', element: <OrdersPage /> },
           { path: 'orders/:id', element: <OrderDetailPage /> },
+          { path: 'profile', element: <ProfilePage /> },
         ],
       },
       {
@@ -76,6 +77,14 @@ export const router = createBrowserRouter([
         children: [
           { path: 'partner/dashboard', element: <PartnerDashboardPage /> },
           {
+            path: 'partner/company/onboarding',
+            element: (
+              <RequireActor allow={['company']}>
+                <CompanyOnboardingPage />
+              </RequireActor>
+            ),
+          },
+          {
             path: 'partner/schedule',
             element: (
               <RequireActor allow={['freelancer']}>
@@ -83,8 +92,9 @@ export const router = createBrowserRouter([
               </RequireActor>
             ),
           },
-          { path: 'partner/orders/:id', element: <PartnerOrderDetailPage /> },
-          { path: 'partner/orders', element: <PartnerOrdersPage /> },
+          // Đơn đặt lịch hiện chỉ có API cho freelancer; đặt lịch với doanh nghiệp chưa được hỗ trợ.
+          { path: 'partner/orders/:id', element: <RequireActor allow={['freelancer']}><PartnerOrderDetailPage /></RequireActor> },
+          { path: 'partner/orders', element: <RequireActor allow={['freelancer']}><PartnerOrdersPage /></RequireActor> },
           { path: 'partner/plans', element: <PartnerPlansPage /> },
         ],
       },
@@ -96,7 +106,8 @@ export const router = createBrowserRouter([
         ),
         errorElement: <RouteErrorBoundary />,
         children: [
-          { path: 'admin/approvals', element: <AdminApprovalsPage /> },
+          { path: 'admin/approvals', element: <AdminCompaniesPage /> },
+          { path: 'admin/companies/:providerId', element: <AdminCompanyDetailPage /> },
           { path: 'admin/disputes', element: <AdminDisputesPage /> },
         ],
       },

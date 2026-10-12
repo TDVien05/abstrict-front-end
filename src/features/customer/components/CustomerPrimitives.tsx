@@ -1,7 +1,7 @@
 import type { PropsWithChildren, ReactNode } from 'react'
 
 export function CustomerContainer({ children, className = '' }: PropsWithChildren<{ className?: string }>) {
-  return <div className={`mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 ${className}`}>{children}</div>
+  return <div className={`w-full px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 ${className}`}>{children}</div>
 }
 
 export function CustomerCard({ children, className = '' }: PropsWithChildren<{ className?: string }>) {

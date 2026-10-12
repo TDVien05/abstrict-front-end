@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -11,40 +12,55 @@ import { partnerRegistrationSchema } from '../../features/partner/registration-s
 afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
 function renderPartner(page: React.ReactNode) {
-  return render(<AuthProvider><MemoryRouter>{page}</MemoryRouter></AuthProvider>)
+  return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><AuthProvider><MemoryRouter>{page}</MemoryRouter></AuthProvider></QueryClientProvider>)
+}
+
+const pendingBooking = {
+  id: 'b1', bookingNumber: 'AB261012HXQDC2', status: 'PendingProviderConfirmation', customerName: 'Hoàng Yến', serviceCategoryCode: 'CLEANING', serviceCategoryName: 'Dọn dẹp nhà cửa',
+  startsAtUtc: '2099-01-01T01:00:00+00:00', endsAtUtc: '2099-01-01T03:00:00+00:00', baseAmountVnd: 160000, depositAmountVnd: 24000, areaLabel: 'Quận 1, Hồ Chí Minh', providerConfirmationDeadlineUtc: '2098-12-31T10:00:00+00:00', allowedActions: ['Confirm', 'Reject'],
+}
+
+function stubBookings(refusal?: { status: number; code: string }) {
+  const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input)
+    if (url.endsWith('/auth/refresh')) return new Response(JSON.stringify({ status: 401, code: 'SESSION_EXPIRED' }), { status: 401 })
+    if (url.endsWith('/counts')) return new Response(JSON.stringify({ counts: { PendingProviderConfirmation: 1, Confirmed: 0, Completed: 0 }, total: 1 }))
+    if (init?.method !== 'POST') return new Response(JSON.stringify({ items: [pendingBooking], page: 1, pageSize: 10, totalItems: 1, totalPages: 1 }))
+    if (refusal) return new Response(JSON.stringify(refusal), { status: refusal.status })
+    return new Response(JSON.stringify({ ...pendingBooking, status: 'Confirmed', allowedActions: [], addressSnapshot: null, customerNote: null, tasks: [], timeline: [] }))
+  })
+  vi.stubGlobal('fetch', fetchMock)
+  return fetchMock
 }
 
 describe('Partner screens', () => {
-  it('filters orders by date and status, and restores the list', () => {
+  it('lists bookings from the API and confirms one', async () => {
+    const fetchMock = stubBookings()
     renderPartner(<PartnerOrdersPage />)
-    fireEvent.change(screen.getByLabelText('Ngày làm việc'), { target: { value: '2026-10-29' } })
-    expect(screen.queryByText('Chị Hoàng Yến')).toBeNull()
-    expect(screen.getByText('Anh Minh Trí')).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'Đã hoàn thành (0)' }))
-    expect(screen.getByText('Không có đơn phù hợp')).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'Xóa bộ lọc' }))
-    expect(screen.getByText('Chị Hoàng Yến')).toBeTruthy()
-    expect(screen.getByText('Anh Minh Trí')).toBeTruthy()
-  })
-
-  it('does not falsely confirm a booking when the service is unavailable', () => {
-    const fetchMock = vi.fn()
-    vi.stubGlobal('fetch', fetchMock)
-    renderPartner(<PartnerOrdersPage />)
-    fireEvent.click(screen.getAllByRole('button', { name: 'Xác nhận nhận ca' })[0])
+    expect(await screen.findByText('Hoàng Yến')).toBeTruthy()
+    expect(fetchMock.mock.calls.some(([input]) => String(input).includes('/freelancer/bookings?status=PendingProviderConfirmation'))).toBe(true)
+    expect(await screen.findByRole('button', { name: 'Chờ bạn xác nhận (1)' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Xác nhận nhận ca' }))
     fireEvent.click(screen.getByRole('button', { name: 'Đồng ý nhận ca' }))
-    expect(screen.getByRole('status').textContent).toContain('Trạng thái đơn không thay đổi')
-    expect(screen.getByRole('button', { name: 'Chờ bạn xác nhận (2)' })).toBeTruthy()
-    expect(fetchMock).not.toHaveBeenCalled()
+    await waitFor(() => expect(fetchMock.mock.calls.some(([input, init]) => String(input).endsWith('/freelancer/bookings/b1/confirm') && init?.method === 'POST')).toBe(true))
   })
 
-  it('collects a rejection reason and lets the user cancel', () => {
+  it('does not falsely confirm a booking when the server refuses', async () => {
+    stubBookings({ status: 409, code: 'CONFIRMATION_EXPIRED' })
     renderPartner(<PartnerOrdersPage />)
-    fireEvent.click(screen.getAllByRole('button', { name: 'Từ chối' })[0])
+    fireEvent.click(await screen.findByRole('button', { name: 'Xác nhận nhận ca' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Đồng ý nhận ca' }))
+    expect((await screen.findByRole('alert')).textContent).toContain('Đã quá hạn xác nhận đơn này. Trạng thái đơn không thay đổi.')
+  })
+
+  it('collects a rejection reason and lets the user cancel', async () => {
+    const fetchMock = stubBookings()
+    renderPartner(<PartnerOrdersPage />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Từ chối' }))
     fireEvent.change(screen.getByLabelText('Lý do từ chối'), { target: { value: 'Bận việc đột xuất' } })
     fireEvent.click(screen.getByRole('button', { name: 'Quay lại' }))
     expect(screen.queryByLabelText('Lý do từ chối')).toBeNull()
-    expect(screen.queryByRole('status')).toBeNull()
+    expect(fetchMock.mock.calls.some(([input]) => /\/(confirm|reject)$/.test(String(input)))).toBe(false)
   })
 
   it('shows the selected plan without claiming a completed payment', () => {

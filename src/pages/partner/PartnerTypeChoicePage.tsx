@@ -14,9 +14,9 @@ const options = [
     to: '/partners/register/company',
     icon: Building2,
     title: 'Doanh nghiệp',
-    description: 'Công ty cung cấp dịch vụ chăm sóc căn hộ, quản lý nhiều nhân sự và điều phối ca làm việc theo hợp đồng.',
-    cta: 'Tìm hiểu đăng ký doanh nghiệp',
-    available: false,
+    description: 'Công ty cung cấp dịch vụ chăm sóc căn hộ, quản lý nhiều nhân sự. Bạn khai thông tin pháp nhân, người đại diện, khu vực nhận ca và giấy tờ để được xét duyệt.',
+    cta: 'Đăng ký với tư cách doanh nghiệp',
+    available: true,
   },
 ]
 

@@ -4,8 +4,8 @@ import { BrandLogo } from '../../../shared/ui/BrandLogo'
 
 export function CustomerFooter() {
   return (
-    <footer className="border-t border-brand-border bg-white px-6 py-6 text-xs text-brand-muted">
-      <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-4 md:flex-row">
+    <footer className="border-t border-brand-border bg-white px-4 py-6 text-xs text-brand-muted sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
+      <div className="flex w-full flex-col items-center justify-between gap-4 md:flex-row">
         <div className="flex items-center gap-2"><BrandLogo size="sm" /><span>© 2026 ABSTRICT. Dịch vụ chăm sóc căn hộ tiêu chuẩn cao.</span></div>
         <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
           <Link className="hover:text-brand-charcoal" to="/discover">Quy chuẩn an toàn</Link>

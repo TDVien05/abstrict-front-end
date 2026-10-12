@@ -5,10 +5,11 @@ import { RouteTransition } from '../../shared/ui/RouteTransition'
 
 export function AppLayout() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-slate-50">
       <AppTopbar actor="customer" />
       <RouteTransition><Outlet /></RouteTransition>
-      <CustomerFooter />
+      {/* Trang ngắn thì chân trang vẫn nằm sát đáy màn hình. */}
+      <div className="mt-auto"><CustomerFooter /></div>
     </div>
   )
 }

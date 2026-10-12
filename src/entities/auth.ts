@@ -4,4 +4,6 @@ export interface AuthUser {
   id: string
   displayName: string
   actor: Actor
+  phoneNumber?: string
+  avatarUrl?: string | null
 }
