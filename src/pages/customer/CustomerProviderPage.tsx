@@ -7,11 +7,28 @@ import { CustomerCard, CustomerContainer, SectionHeading, StatusPill } from '../
 import { ApiError } from '../../shared/api/problem-details'
 import { bookingErrorMessage } from '../../entities/booking'
 import { formatVnd } from '../../shared/lib/format-currency'
-import { vnDateLabel, vnTime } from '../../shared/lib/vn-time'
-
-const inputClass = 'h-11 w-full rounded-xl border border-brand-border bg-white px-3 text-sm outline-none focus:border-brand-charcoal'
+import { vnDateLabel, vnIsoDate, vnTime } from '../../shared/lib/vn-time'
 
 const maxDurationMs = 12 * 3_600_000
+
+const weekdays = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7']
+const chipClass = (selected: boolean) => `rounded-xl border text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-purple ${selected ? 'border-brand-charcoal bg-brand-charcoal text-white' : 'border-brand-border bg-white text-brand-charcoal hover:border-brand-charcoal'}`
+
+// `date` là ngày lịch theo giờ Việt Nam (YYYY-MM-DD) do server trả.
+function dayLabel(date: string, today: string) {
+  const noon = new Date(`${date}T12:00:00+07:00`)
+  const tomorrow = vnIsoDate(Date.parse(`${today}T12:00:00+07:00`) + 86_400_000)
+  return { weekday: date === today ? 'Hôm nay' : date === tomorrow ? 'Ngày mai' : weekdays[noon.getUTCDay()], day: date.slice(8), month: `Th${Number(date.slice(5, 7))}` }
+}
+
+function periodOf(startMs: number) {
+  const hour = Number(vnTime(startMs).slice(0, 2))
+  return hour < 12 ? 'Buổi sáng' : hour < 18 ? 'Buổi chiều' : 'Buổi tối'
+}
+
+function hoursLabel(durationMs: number) {
+  return `${(durationMs / 3_600_000).toLocaleString('vi-VN')} giờ`
+}
 
 function steps(from: number, to: number, stepMs: number) {
   const values: number[] = []
@@ -27,7 +44,7 @@ export function CustomerProviderPage() {
   const [serviceCode, setServiceCode] = useState('')
   const [pickedDate, setPickedDate] = useState('')
   const [pickedStart, setPickedStart] = useState<number | null>(null)
-  const [pickedEnd, setPickedEnd] = useState<number | null>(null)
+  const [pickedDurationMs, setPickedDurationMs] = useState<number | null>(null)
 
   const service = provider?.services.find((item) => item.code === serviceCode) ?? provider?.services[0]
 
@@ -41,7 +58,9 @@ export function CustomerProviderPage() {
   const start = pickedStart !== null && startOptions.includes(pickedStart) ? pickedStart : startOptions[0]
   const range = ranges.find((item) => start !== undefined && start >= item.start && start < item.end)
   const endOptions = range && start !== undefined ? steps(start + minDurationMs, Math.min(range.end, start + maxDurationMs), stepMs) : []
-  const end = pickedEnd !== null && endOptions.includes(pickedEnd) ? pickedEnd : endOptions[0]
+  // Giữ thời lượng đã chọn khi khách đổi giờ bắt đầu, miễn là còn nằm trong khoảng rảnh.
+  const end = pickedDurationMs !== null && start !== undefined && endOptions.includes(start + pickedDurationMs) ? start + pickedDurationMs : endOptions[0]
+  const today = vnIsoDate()
   const hasSlot = start !== undefined && end !== undefined
   const duration = hasSlot ? (end - start) / 3_600_000 : 0
   const total = service ? service.hourlyRateVnd * duration : 0
@@ -88,15 +107,45 @@ export function CustomerProviderPage() {
             <CustomerCard className="p-6 sm:p-8">
               <SectionHeading description={`Chọn trong lịch rảnh của đối tác, tối thiểu ${minDurationMs / 3_600_000} giờ liên tục.`} title="Thời gian đặt ca" />
               {availability.isPending ? <p className="mt-5 text-sm text-brand-muted" role="status">Đang tải lịch rảnh...</p> : availability.isError ? <p className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-700" role="alert">{bookingErrorMessage(availability.error)}</p> : !day ? <p className="mt-5 text-sm text-brand-muted">Đối tác chưa mở lịch rảnh trong 14 ngày tới.</p> : (
-                <>
-                  <div className="mt-5 grid gap-4 sm:grid-cols-3">
-                    <label className="text-xs font-semibold text-brand-muted">Ngày làm<select className={`mt-2 ${inputClass}`} onChange={(event) => setPickedDate(event.target.value)} value={day.date}>{freeDays.map((item) => <option key={item.date} value={item.date}>{vnDateLabel(item.free[0].startsAtUtc)}</option>)}</select></label>
-                    <label className="text-xs font-semibold text-brand-muted">Giờ bắt đầu<select className={`mt-2 ${inputClass}`} onChange={(event) => setPickedStart(Number(event.target.value))} value={start}>{startOptions.map((value) => <option key={value} value={value}>{vnTime(value)}</option>)}</select></label>
-                    <label className="text-xs font-semibold text-brand-muted">Giờ kết thúc<select className={`mt-2 ${inputClass}`} onChange={(event) => setPickedEnd(Number(event.target.value))} value={end}>{endOptions.map((value) => <option key={value} value={value}>{vnTime(value)}</option>)}</select></label>
+                <div className="mt-6 space-y-7">
+                  <div>
+                    <p className="text-sm font-semibold text-brand-charcoal">1. Chọn ngày</p>
+                    <div aria-label="Ngày làm" className="mt-3 flex gap-2 overflow-x-auto pb-2" role="group">
+                      {freeDays.map((item) => {
+                        const label = dayLabel(item.date, today)
+                        const selected = item.date === day.date
+                        return <button aria-label={vnDateLabel(item.free[0].startsAtUtc)} aria-pressed={selected} className={`${chipClass(selected)} flex w-[72px] shrink-0 flex-col items-center px-2 py-2.5`} key={item.date} onClick={() => setPickedDate(item.date)} type="button"><span className={`text-[11px] font-medium ${selected ? 'text-white/80' : 'text-brand-muted'}`}>{label.weekday}</span><span className="text-xl leading-7">{label.day}</span><span className={`text-[11px] font-medium ${selected ? 'text-white/80' : 'text-brand-muted'}`}>{label.month}</span></button>
+                      })}
+                    </div>
                   </div>
-                  <p className="mt-4 flex items-center gap-2 text-xs text-brand-muted"><Clock3 className="h-4 w-4 text-brand-purple" />{hasSlot ? `Đã chọn ${duration} giờ · ${vnTime(start)} – ${vnTime(end)}` : 'Ngày này không còn khung giờ đủ dài.'}</p>
-                  <p className="mt-2 text-xs text-brand-muted">Khung rảnh trong ngày: {day.free.map((item) => `${vnTime(item.startsAtUtc)} – ${vnTime(item.endsAtUtc)}`).join(', ')}</p>
-                </>
+
+                  <div>
+                    <p className="text-sm font-semibold text-brand-charcoal">2. Giờ bắt đầu</p>
+                    {startOptions.length === 0 ? <p className="mt-3 text-sm text-brand-muted">Ngày này không còn khung giờ đủ dài.</p> : (
+                      <div aria-label="Giờ bắt đầu" className="mt-3 space-y-4" role="group">
+                        {ranges.map((item) => (
+                          <div key={item.start}>
+                            <p className="text-xs text-brand-muted">{periodOf(item.start)} · đối tác rảnh {vnTime(item.start)} – {vnTime(item.end)}</p>
+                            <div className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-6 xl:grid-cols-8">
+                              {steps(item.start, item.end - minDurationMs, stepMs).map((value) => <button aria-pressed={value === start} className={`${chipClass(value === start)} h-10 tabular-nums`} key={value} onClick={() => setPickedStart(value)} type="button">{vnTime(value)}</button>)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {hasSlot ? (
+                    <div>
+                      <p className="text-sm font-semibold text-brand-charcoal">3. Thời lượng</p>
+                      <div aria-label="Thời lượng" className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-6" role="group">
+                        {endOptions.map((value) => <button aria-pressed={value === end} className={`${chipClass(value === end)} flex flex-col items-center px-2 py-2`} key={value} onClick={() => setPickedDurationMs(value - start)} type="button"><span>{hoursLabel(value - start)}</span><span className={`text-[11px] font-medium tabular-nums ${value === end ? 'text-white/80' : 'text-brand-muted'}`}>đến {vnTime(value)}</span></button>)}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {hasSlot ? <p className="flex items-center gap-2 rounded-xl bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-charcoal" role="status"><Clock3 aria-hidden="true" className="h-4 w-4 shrink-0 text-brand-purple" /><span><span className="inline-block first-letter:uppercase">{vnDateLabel(new Date(start).toISOString())}</span> · {vnTime(start)} – {vnTime(end)} · {hoursLabel(end - start)}</span></p> : null}
+                </div>
               )}
             </CustomerCard>
           </div>

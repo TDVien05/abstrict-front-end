@@ -5,6 +5,7 @@ import { useCreateAvailability, useDeleteAvailability, useMyAvailability } from 
 import { PartnerPage, PartnerPanel, partnerInput } from '../../features/partner/components/PartnerPrimitives'
 import { durationHours, vnDateLabel, vnIsoDate, vnTimeRange, vnToUtcIso } from '../../shared/lib/vn-time'
 import { Button } from '../../shared/ui/Button'
+import { Select } from '../../shared/ui/Select'
 
 const horizonDays = 30
 const timeOptions = Array.from({ length: 48 }, (_, index) => `${String(Math.floor(index / 2)).padStart(2, '0')}:${index % 2 === 0 ? '00' : '30'}`)
@@ -30,8 +31,8 @@ export function PartnerAvailabilityPage() {
         <form className="space-y-4" onSubmit={submit}>
           <label className="block text-sm font-semibold">Ngày<input className={`${partnerInput} mt-2`} min={today} onChange={(event) => setDate(event.target.value)} required type="date" value={date} /></label>
           <div className="grid grid-cols-2 gap-4">
-            <label className="block text-sm font-semibold">Từ<select className={`${partnerInput} mt-2`} onChange={(event) => setStartTime(event.target.value)} value={startTime}>{timeOptions.map((time) => <option key={time}>{time}</option>)}</select></label>
-            <label className="block text-sm font-semibold">Đến<select className={`${partnerInput} mt-2`} onChange={(event) => setEndTime(event.target.value)} value={endTime}>{timeOptions.map((time) => <option key={time}>{time}</option>)}</select></label>
+            <label className="block text-sm font-semibold">Từ<Select className={`${partnerInput} mt-2`} onChange={(event) => setStartTime(event.target.value)} value={startTime}>{timeOptions.map((time) => <option key={time}>{time}</option>)}</Select></label>
+            <label className="block text-sm font-semibold">Đến<Select className={`${partnerInput} mt-2`} onChange={(event) => setEndTime(event.target.value)} value={endTime}>{timeOptions.map((time) => <option key={time}>{time}</option>)}</Select></label>
           </div>
           <p className={`text-sm ${tooShort ? 'text-red-700' : 'text-brand-muted'}`}>Mỗi khoảng rảnh tối thiểu 2 giờ, theo bước 30 phút, không chồng lên khoảng đã mở.</p>
           {create.isError && <p className="text-sm text-red-700" role="alert">{bookingErrorMessage(create.error)}</p>}

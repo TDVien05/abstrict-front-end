@@ -40,7 +40,7 @@ Các endpoint ghi (tạo đơn, đặt cọc, chốt sandbox, hủy, lấy mã Q
 
 ## Đăng nhập và phiên
 
-`POST /auth/login` dùng chung cho mọi vai trò. `role` trong response là một trong `Customer`, `Freelancer`, `Admin` (tài khoản `Company` chưa đăng nhập được). Khách hàng nhận kèm `customerProfile` (xem `CUSTOMER_PROFILE_API.md`); freelancer nhận kèm `freelancerOnboarding`:
+`POST /auth/login` dùng chung cho mọi vai trò. `role` trong response là một trong `Customer`, `Freelancer`, `Company`, `Admin`. Khách hàng nhận kèm `customerProfile` (xem `CUSTOMER_PROFILE_API.md`); công ty nhận kèm `companyOnboarding` (xem `COMPANY_ONBOARDING_API.md`); freelancer nhận kèm `freelancerOnboarding`:
 
 ```json
 "freelancerOnboarding": { "providerId": "dddddddd-0000-0000-0000-000000000001", "kycStatus": "Approved", "currentStep": "Completed" }
@@ -52,7 +52,7 @@ Các endpoint ghi (tạo đơn, đặt cọc, chốt sandbox, hủy, lấy mã Q
 | `currentStep` | Bước tiếp theo: `Profile` (điền thông tin cá nhân), `Documents` (thiếu hoặc bị từ chối giấy tờ), `Submit` (đủ hồ sơ, chưa gửi duyệt), `AwaitingReview`, `Completed`, `Suspended`. |
 | `providerId` | `null` khi chưa bắt đầu KYC. |
 
-Đường dẫn xác thực chính thức của freelancer là các đường dẫn đang có trong Swagger: `POST /auth/register-freelancer`, `POST /auth/verify-phone-otp`, `POST /auth/resend-phone-otp`, `POST /auth/login`. Không có nhóm `/auth/freelancers/*`.
+Đường dẫn xác thực chính thức của freelancer là các đường dẫn đang có trong Swagger: `POST /auth/register-freelancer`, `POST /auth/verify-phone-otp`, `POST /auth/resend-phone-otp`, `POST /auth/login`. Không có nhóm `/auth/freelancers/*`. Công ty đăng ký qua `POST /auth/register-company` và dùng chung ba đường dẫn còn lại.
 
 **Khôi phục phiên.** Đăng nhập thành công đặt cookie `abstrict_refresh` (`HttpOnly`, `SameSite=Lax`, `Path=/api/v1/auth`, sống 30 ngày, `Secure` ngoài môi trường Development). FE gọi các endpoint auth với `credentials: 'include'`.
 
@@ -92,6 +92,25 @@ Mặc định (cấu hình ở mục `Booking`, các giá trị chưa chốt ch�
 ```
 
 `city` và `district` phải khớp chính xác một khu vực trong `GET /catalog/service-areas` thì mới đặt được với freelancer phục vụ khu vực đó. Địa chỉ đầu tiên tự là mặc định. Xóa địa chỉ không ảnh hưởng đơn đã đặt vì đơn lưu bản chụp địa chỉ.
+
+### GET `/catalog/administrative-divisions`
+
+Public. Tỉnh/thành và quận/huyện của Việt Nam (63 tỉnh/thành, 696 quận/huyện) cho dropdown Thành phố / Quận-Huyện của form địa chỉ. Lọc theo tỉnh/thành bằng `?city=Hồ Chí Minh`.
+
+```json
+[
+  {
+    "code": 79,
+    "name": "Hồ Chí Minh",
+    "districts": [
+      { "code": 760, "name": "Quận 1", "isServed": true },
+      { "code": 783, "name": "Huyện Củ Chi", "isServed": true }
+    ]
+  }
+]
+```
+
+`name` của tỉnh/thành bỏ tiền tố "Thành phố"/"Tỉnh"; gửi `name` của tỉnh/thành và của quận/huyện lên `city` và `district` khi lưu địa chỉ. `isServed` là `true` khi nền tảng có khu vực dịch vụ đang hoạt động ở quận/huyện đó (hiện là 22 quận/huyện của TP. Hồ Chí Minh); địa chỉ ở nơi `false` vẫn lưu được nhưng chưa đặt lịch được. Response có `Cache-Control: public, max-age=3600`.
 
 ## GET `/freelancers/{providerId}/availability`
 
@@ -318,7 +337,7 @@ powershell -File scripts/seed-booking-fixtures.ps1    # lịch rảnh 08-12h và
 | 5 | `id` danh mục trong hồ sơ freelancer | Xong: `services[].serviceCategoryId`. |
 | 6 | `allowedActions` phía freelancer | Xong ở cả danh sách và chi tiết: `Confirm`, `Reject`. |
 | 7 | Giới hạn request cho báo giá | `POST /bookings/quote` không bị giới hạn tần suất. |
-| 8 | Danh sách giá trị | `role`: `Customer`, `Freelancer`, `Admin`. `timeline[].reason`: bảng mã ở mục "Chi tiết đơn". `status` trong query: tên enum dạng chuỗi, đã thử ở cả hai phía. |
+| 8 | Danh sách giá trị | `role`: `Customer`, `Freelancer`, `Company`, `Admin`. `timeline[].reason`: bảng mã ở mục "Chi tiết đơn". `status` trong query: tên enum dạng chuỗi, đã thử ở cả hai phía. |
 | 9 | Tài khoản khách hàng thử | Xong: `0920000001` trong `seed-booking-fixtures.ps1`. |
 | 10 | Các bước sau `Confirmed` | Chưa làm, thuộc giai đoạn sau. |
 | 11 | Cổng thanh toán thật | Chưa làm, PSP chưa chốt. `/payments/sandbox/*` trả 404 khi `Payments:SandboxEnabled` tắt. |
