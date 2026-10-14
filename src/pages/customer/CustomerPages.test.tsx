@@ -1,15 +1,20 @@
 // @vitest-environment jsdom
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { AddressPicker } from '../../features/customer/components/AddressPicker'
 import { BookingCreatePage } from './BookingCreatePage'
 import { CustomerDiscoveryPage } from './CustomerDiscoveryPage'
 import { CustomerProviderPage } from './CustomerProviderPage'
 import { OrderDetailPage } from './OrderDetailPage'
 
 const providerId = 'dddddddd-0000-0000-0000-000000000001'
+
+const divisions = [{ code: 79, name: 'Hồ Chí Minh', districts: [{ code: 760, name: 'Quận 1', isServed: true }] }]
+const quan1Wards = [{ code: '26734', name: 'Phường Tân Định' }, { code: '26740', name: 'Phường Bến Nghé' }]
+const wardsPath = '/catalog/administrative-divisions/provinces/79/districts/760/wards'
 
 const booking = {
   id: 'b1', bookingNumber: 'AB261012HXQDC2', status: 'PendingDeposit', providerId, providerDisplayName: 'Nguyễn Thị Lan', serviceCategoryCode: 'CLEANING', serviceCategoryName: 'Dọn dẹp nhà cửa',
@@ -42,6 +47,9 @@ describe('customer booking screens', () => {
           serviceAreas: [{ id: 'a1', city: 'Hồ Chí Minh', district: 'Quận 1', wardOrComplex: null, travelRadiusKm: 10 }],
         })
       }
+      if (url.endsWith(wardsPath)) return jsonResponse(quan1Wards)
+      if (url.includes('/catalog/administrative-divisions')) return jsonResponse(divisions)
+      if (url.includes('/catalog/service-areas')) return jsonResponse([{ id: 'a1', city: 'Hồ Chí Minh', district: 'Quận 1', wardOrComplex: null, isActive: true }, { id: 'a2', city: 'Hồ Chí Minh', district: 'Quận 3', wardOrComplex: null, isActive: true }])
       if (url.includes('/checklist')) return jsonResponse({ templateId: 't1', name: 'Dọn dẹp', version: 1, items: [{ id: 'i1', parentItemId: null, areaName: 'Bếp', description: 'Lau tủ lạnh', sortOrder: 1, isRequired: false }] })
       if (url.includes('/customer/addresses')) return jsonResponse([{ id: 'addr-1', label: 'Nhà', apartmentNumber: 'A-1205', floor: '12', buildingName: 'Vinhomes', streetAddress: '12 Lê Lợi', ward: 'Bến Nghé', district: 'Quận 1', city: 'Hồ Chí Minh', accessInstructions: null, isDefault: true }])
       if (url.includes('/bookings/quote')) return jsonResponse({ unitPriceVnd: 80000, durationMinutes: 120, baseAmountVnd: 160000, surchargeAmountVnd: 0, depositAmountVnd: 24000, depositPercent: 15, remainingAmountVnd: 136000, holdMinutes: 15 })
@@ -69,6 +77,17 @@ describe('customer booking screens', () => {
       </QueryClientProvider>,
     )
 
+    // Gõ không dấu vẫn lọc được tỉnh/thành; chọn xong thì danh bạ được gọi lại với đúng tên server dùng.
+    await screen.findAllByRole('link', { name: 'Xem hồ sơ' })
+    // Ô chọn dịch vụ (select gốc) cũng mang role combobox và đứng đầu.
+    const [, cityBox, districtBox] = screen.getAllByRole('combobox') as HTMLInputElement[]
+    expect(districtBox.disabled).toBe(true)
+    fireEvent.focus(cityBox)
+    fireEvent.change(cityBox, { target: { value: 'ho chi' } })
+    fireEvent.click(await screen.findByRole('option', { name: 'Hồ Chí Minh' }))
+    await waitFor(() => expect(fetchMock.mock.calls.some(([input]) => decodeURIComponent(String(input)).replace(/\+/g, ' ').includes('city=Hồ Chí Minh'))).toBe(true))
+    expect((screen.getAllByRole('combobox')[2] as HTMLInputElement).disabled).toBe(false)
+
     fireEvent.click((await screen.findAllByRole('link', { name: 'Xem hồ sơ' }))[0])
     expect(await screen.findByText('Dịch vụ & bảng giá')).toBeTruthy()
 
@@ -91,5 +110,75 @@ describe('customer booking screens', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Thanh toán cọc' }))
     expect(await screen.findByText('Cổng thanh toán giả lập')).toBeTruthy()
     expect(new Headers(postTo('/bookings/b1/deposit')?.headers).get('Idempotency-Key')).toBeTruthy()
+  })
+})
+
+describe('customer address form', () => {
+  function renderAddressBook(wards: unknown, addresses: unknown[] = []) {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input)
+      if (url.endsWith(wardsPath)) return jsonResponse(wards)
+      if (url.includes('/catalog/administrative-divisions')) return jsonResponse(divisions)
+      if (init?.method === 'POST' || init?.method === 'PUT') return jsonResponse({ id: 'addr-new', ...JSON.parse(String(init.body)) }, 201)
+      return jsonResponse(addresses)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><AddressPicker /></QueryClientProvider>)
+    return fetchMock
+  }
+
+  async function chooseQuan1() {
+    await screen.findByRole('option', { name: 'Hồ Chí Minh' })
+    fireEvent.change(screen.getByLabelText('Tỉnh / Thành phố'), { target: { value: 'Hồ Chí Minh' } })
+    fireEvent.change(screen.getByLabelText('Quận / Huyện'), { target: { value: 'Quận 1' } })
+  }
+
+  it('lists the wards of the chosen district and saves the ward name', async () => {
+    const fetchMock = renderAddressBook(quan1Wards)
+    fireEvent.click(await screen.findByRole('button', { name: /Thêm địa chỉ mới/ }))
+    expect((screen.getByLabelText('Phường / Xã') as HTMLSelectElement).disabled).toBe(true)
+
+    await chooseQuan1()
+    await screen.findByRole('option', { name: 'Phường Tân Định' })
+    const wardSelect = screen.getByLabelText('Phường / Xã') as HTMLSelectElement
+    expect([...wardSelect.options].map((option) => option.text)).toEqual(['Chọn phường / xã', 'Phường Tân Định', 'Phường Bến Nghé'])
+
+    fireEvent.change(screen.getByLabelText('Số căn hộ'), { target: { value: 'A-1205' } })
+    fireEvent.change(screen.getByLabelText('Tòa nhà / Chung cư'), { target: { value: 'Vinhomes' } })
+    fireEvent.change(screen.getByLabelText('Số nhà, tên đường'), { target: { value: '12 Lê Lợi' } })
+    fireEvent.change(wardSelect, { target: { value: 'Phường Tân Định' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu địa chỉ' }))
+
+    await waitFor(() => expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'POST')).toBe(true))
+    const body = JSON.parse(String(fetchMock.mock.calls.find(([, init]) => init?.method === 'POST')?.[1]?.body))
+    expect(body).toMatchObject({ city: 'Hồ Chí Minh', district: 'Quận 1', ward: 'Phường Tân Định' })
+  })
+
+  it('resets the ward when the district changes', async () => {
+    renderAddressBook(quan1Wards)
+    fireEvent.click(await screen.findByRole('button', { name: /Thêm địa chỉ mới/ }))
+    await chooseQuan1()
+    await screen.findByRole('option', { name: 'Phường Tân Định' })
+    fireEvent.change(screen.getByLabelText('Phường / Xã'), { target: { value: 'Phường Tân Định' } })
+    fireEvent.change(screen.getByLabelText('Quận / Huyện'), { target: { value: '' } })
+    const wardSelect = screen.getByLabelText('Phường / Xã') as HTMLSelectElement
+    expect(wardSelect.value).toBe('')
+    expect(wardSelect.disabled).toBe(true)
+  })
+
+  it('falls back to a free-text ward when the server has no ward data', async () => {
+    renderAddressBook([])
+    fireEvent.click(await screen.findByRole('button', { name: /Thêm địa chỉ mới/ }))
+    await chooseQuan1()
+    await waitFor(() => expect(screen.getByLabelText('Phường / Xã').tagName).toBe('INPUT'))
+  })
+
+  it('keeps a previously typed ward that is not in the list when editing', async () => {
+    renderAddressBook(quan1Wards, [{ id: 'addr-1', label: 'Nhà', apartmentNumber: 'A-1205', floor: null, buildingName: 'Vinhomes', streetAddress: '12 Lê Lợi', ward: 'Bến Nghé cũ', district: 'Quận 1', city: 'Hồ Chí Minh', accessInstructions: null, isDefault: true }])
+    fireEvent.click(await screen.findByRole('button', { name: 'Sửa' }))
+    await screen.findByRole('option', { name: 'Phường Tân Định' })
+    const wardSelect = screen.getByLabelText('Phường / Xã') as HTMLSelectElement
+    expect(wardSelect.value).toBe('Bến Nghé cũ')
+    expect([...wardSelect.options].map((option) => option.text)).toContain('Bến Nghé cũ')
   })
 })
