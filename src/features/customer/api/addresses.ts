@@ -27,6 +27,13 @@ export interface CatalogServiceArea {
 }
 
 // Hồ sơ khách hàng cũng chứa sổ địa chỉ, nên mọi thay đổi làm mới cả nhóm khóa 'customer'.
+export interface AdministrativeDivision {
+  code: number
+  name: string
+  /** `isServed` = nền tảng đang có dịch vụ ở quận/huyện đó; nơi chưa phục vụ vẫn lưu được địa chỉ nhưng chưa đặt lịch được. */
+  districts: { code: number; name: string; isServed: boolean }[]
+}
+
 const customerKey = ['customer']
 const addressesKey = [...customerKey, 'addresses']
 
@@ -40,6 +47,11 @@ export function useCustomerAddresses() {
 
 export function useServiceAreas() {
   return useQuery({ queryKey: ['catalog', 'service-areas'], queryFn: () => apiRequest<CatalogServiceArea[]>('/catalog/service-areas'), staleTime: Infinity })
+}
+
+// Toàn bộ tỉnh/thành và quận/huyện cho form địa chỉ; `name` được gửi nguyên làm city/district.
+export function useAdministrativeDivisions() {
+  return useQuery({ queryKey: ['catalog', 'administrative-divisions'], queryFn: () => apiRequest<AdministrativeDivision[]>('/catalog/administrative-divisions'), staleTime: Infinity })
 }
 
 export function useSaveCustomerAddress() {

@@ -29,6 +29,7 @@ import { PartnerPage, PartnerPanel, partnerInputBlue } from '../../features/part
 import { formatVnd } from '../../shared/lib/format-currency'
 import { vnDateTime } from '../../shared/lib/vn-time'
 import { Button } from '../../shared/ui/Button'
+import { Select } from '../../shared/ui/Select'
 
 type FormStep = 'Company' | 'Representative' | 'ServiceAreas' | 'Documents' | 'Submit'
 
@@ -105,7 +106,7 @@ function CompanyStep({ onboarding, onSaved }: StepProps) {
           <label className={labelClass}>Tên hiển thị với khách<input className={inputClass} maxLength={120} minLength={2} placeholder="Sạch Nhà" required {...field('displayName')} /></label>
           <label className={labelClass}>Mã số thuế<input className={inputClass} inputMode="numeric" pattern="\s*\d(\s*\d){9}(\s*-\s*\d{3})?\s*" placeholder="0312345678 hoặc 0312345678-001" required title="10 chữ số, hoặc 10 chữ số kèm hậu tố chi nhánh -001" {...field('taxCode')} /></label>
           <label className={labelClass}>Hotline<input className={inputClass} inputMode="tel" placeholder="1900 1234" required {...field('hotline')} /></label>
-          <label className={labelClass}>Quy mô nhân sự<select className={inputClass} {...field('workforceSize')}>{Object.entries(workforceSizeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+          <label className={labelClass}>Quy mô nhân sự<Select className={inputClass} {...field('workforceSize')}>{Object.entries(workforceSizeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>
           <label className={`${labelClass} sm:col-span-2`}>Địa chỉ trụ sở<input className={inputClass} maxLength={300} minLength={5} placeholder="12 Lê Lợi, Quận 1, Hồ Chí Minh" required {...field('headquartersAddress')} /></label>
           <label className={`${labelClass} sm:col-span-2`}>Mức bảo hiểm trách nhiệm (VND, không bắt buộc)<input className={inputClass} inputMode="numeric" min={0} placeholder="500000000" step={1} type="number" {...field('liabilityCoverageVnd')} /><span className="mt-1.5 block text-sm font-normal text-brand-muted">Nếu nhập số lớn hơn 0, bạn sẽ cần tải thêm giấy chứng nhận bảo hiểm ở bước Giấy tờ.</span></label>
         </div>

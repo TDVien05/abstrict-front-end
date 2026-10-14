@@ -8,6 +8,7 @@ import { paymentMethods, requestCheckInToken, useBooking, useCancelBooking, useC
 import { CustomerCard, CustomerContainer, StatusPill } from '../../features/customer/components/CustomerPrimitives'
 import { formatVnd } from '../../shared/lib/format-currency'
 import { durationHours, vnDateLabel, vnDateTime, vnTimeRange } from '../../shared/lib/vn-time'
+import { Select } from '../../shared/ui/Select'
 
 const primaryButton = 'inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand-charcoal px-4 text-sm font-semibold text-white hover:bg-black disabled:cursor-not-allowed disabled:opacity-50'
 const secondaryButton = 'inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-brand-border bg-white px-4 text-sm font-semibold text-brand-charcoal hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50'
@@ -40,7 +41,7 @@ function DepositPanel({ booking }: { booking: BookingDetail }) {
       {booking.holdExpiresAtUtc ? <p className="mt-1 flex items-center gap-2 text-sm text-amber-800"><Timer aria-hidden="true" className="h-4 w-4" />Giữ chỗ còn <Countdown offsetMs={booking.clockOffsetMs} until={booking.holdExpiresAtUtc} /></p> : null}
       {payment === null ? (
         <>
-          <label className="mt-4 block text-xs font-semibold text-brand-muted">Phương thức thanh toán<select className="mt-1.5 h-11 w-full rounded-xl border border-brand-border bg-white px-3 text-sm font-normal text-brand-charcoal outline-none focus:border-brand-charcoal" onChange={(event) => setMethod(event.target.value as PaymentMethod)} value={method}>{Object.entries(paymentMethods).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+          <label className="mt-4 block text-xs font-semibold text-brand-muted">Phương thức thanh toán<Select className="mt-1.5 h-11 w-full rounded-xl border border-brand-border bg-white px-3 text-sm font-normal text-brand-charcoal outline-none focus:border-brand-charcoal" onChange={(event) => setMethod(event.target.value as PaymentMethod)} value={method}>{Object.entries(paymentMethods).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>
           {failed && !initiate.isPending ? <p className={errorClass} role="alert">Thanh toán không thành công. Bạn có thể thử lại trong thời gian giữ chỗ.</p> : null}
           {initiate.isError ? <p className={errorClass} role="alert">{bookingErrorMessage(initiate.error)}</p> : null}
           <button className={`${primaryButton} mt-4 w-full`} disabled={initiate.isPending} onClick={() => initiate.mutate({ idempotencyKey: failed ? crypto.randomUUID() : idempotencyKey, method })} type="button">{initiate.isPending ? 'Đang khởi tạo...' : failed ? 'Thanh toán lại' : 'Thanh toán cọc'}</button>

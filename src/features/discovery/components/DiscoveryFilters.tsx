@@ -1,5 +1,6 @@
 import type { SetURLSearchParams } from 'react-router-dom'
 import { Button } from '../../../shared/ui/Button'
+import { Select } from '../../../shared/ui/Select'
 
 interface DiscoveryFiltersProps {
   searchParams: URLSearchParams
@@ -30,7 +31,7 @@ export function DiscoveryFilters({ searchParams, setSearchParams }: DiscoveryFil
       </label>
       <label className="grid gap-2 text-sm font-semibold text-slate-700">
         Loại đối tác
-        <select
+        <Select
           className="rounded-xl border border-slate-300 px-3 py-2.5 font-normal outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
           onChange={(event) => updateFilter('type', event.currentTarget.value)}
           value={searchParams.get('type') ?? ''}
@@ -38,7 +39,7 @@ export function DiscoveryFilters({ searchParams, setSearchParams }: DiscoveryFil
           <option value="">Tất cả</option>
           <option value="freelancer">Freelancer</option>
           <option value="company">Công ty</option>
-        </select>
+        </Select>
       </label>
       <label className="grid gap-2 text-sm font-semibold text-slate-700">
         Ngày cần đặt

@@ -73,7 +73,9 @@ describe('customer booking screens', () => {
     expect(await screen.findByText('Dịch vụ & bảng giá')).toBeTruthy()
 
     // Lịch rảnh 08:00–12:00 giờ VN: mặc định chọn ca tối thiểu 2 giờ đầu tiên.
-    expect(((await screen.findByLabelText('Giờ bắt đầu')) as HTMLSelectElement).value).toBe(String(Date.parse('2099-01-01T01:00:00Z')))
+    expect((await screen.findByRole('button', { name: '08:00' })).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByRole('button', { name: /2 giờ.*đến 10:00/ }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.queryByRole('button', { name: '10:30' })).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: /Tiếp tục đặt lịch/ }))
     expect(await screen.findByRole('heading', { name: 'Xác nhận đặt dịch vụ & ký quỹ' })).toBeTruthy()
 

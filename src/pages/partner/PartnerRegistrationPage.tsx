@@ -11,6 +11,7 @@ import { Button } from '../../shared/ui/Button'
 import frontExample from '../../features/partner/assets/identity-front-example.jpg'
 import backExample from '../../features/partner/assets/identity-back-example.jpg'
 import portraitExample from '../../features/partner/assets/portrait-example.jpg'
+import { Select } from '../../shared/ui/Select'
 
 const areas = [
   ['Vinhomes Central Park', 'Bình Thạnh'],
@@ -234,7 +235,7 @@ export function PartnerRegistrationPage() {
                 <div className="mt-8">
                   <h3 className="mb-4 font-semibold">Tài khoản ngân hàng liên kết nhận thù lao</h3>
                   <div className="grid gap-4 sm:grid-cols-3">
-                    <div className="min-w-0"><label className="mb-2 block text-sm font-semibold" htmlFor="bank">Ngân hàng thụ hưởng *</label><select id="bank" className={kycInput} {...register('bank')} aria-invalid={Boolean(errors.bank)}><option value="">Chọn ngân hàng</option>{['Vietcombank', 'Techcombank', 'MBBank', 'ACB', 'BIDV', 'VietinBank', 'VPBank', 'Sacombank'].map((bank) => <option key={bank}>{bank}</option>)}</select>{errors.bank && <p className="mt-2 text-sm text-red-700">{errors.bank.message}</p>}</div>
+                    <div className="min-w-0"><label className="mb-2 block text-sm font-semibold" htmlFor="bank">Ngân hàng thụ hưởng *</label><Select id="bank" className={kycInput} {...register('bank')} aria-invalid={Boolean(errors.bank)}><option value="">Chọn ngân hàng</option>{['Vietcombank', 'Techcombank', 'MBBank', 'ACB', 'BIDV', 'VietinBank', 'VPBank', 'Sacombank'].map((bank) => <option key={bank}>{bank}</option>)}</Select>{errors.bank && <p className="mt-2 text-sm text-red-700">{errors.bank.message}</p>}</div>
                     <KycField name="bankAccount" label="Số tài khoản" inputMode="numeric" />
                     <KycField name="accountName" label="Tên chủ tài khoản" />
                   </div>
