@@ -1,7 +1,7 @@
 import { MapPin, Plus } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { bookingErrorMessage } from '../../../entities/booking'
-import { formatAddress, useCustomerAddresses, useDeleteCustomerAddress, useAdministrativeDivisions, useSaveCustomerAddress, type CustomerAddress, type SaveCustomerAddressRequest } from '../api/addresses'
+import { formatAddress, useCustomerAddresses, useDeleteCustomerAddress, useAdministrativeDivisions, useAdministrativeWards, useSaveCustomerAddress, type CustomerAddress, type SaveCustomerAddressRequest } from '../api/addresses'
 import { StatusPill } from './CustomerPrimitives'
 import { Select } from '../../../shared/ui/Select'
 
@@ -14,8 +14,16 @@ function AddressForm({ address, onDone }: { address?: CustomerAddress; onDone: (
   const divisions = useAdministrativeDivisions()
   const save = useSaveCustomerAddress()
   const [values, setValues] = useState<SaveCustomerAddressRequest>(address ?? emptyAddress)
-  const districts = divisions.data?.find((division) => division.name === values.city)?.districts ?? []
+  const province = divisions.data?.find((division) => division.name === values.city)
+  const districts = province?.districts ?? []
   const district = districts.find((item) => item.name === values.district)
+  const wards = useAdministrativeWards(province?.code, district?.code)
+  const wardOptions = wards.data ?? []
+  // Không chặn người dùng lưu địa chỉ khi không có danh sách phường/xã: server trả [], lỗi,
+  // hoặc quận/huyện đang lưu không có trong danh mục (dữ liệu nhập tay trước đây).
+  const wardIsFreeText = Boolean(values.district) && (wards.isError || (wards.isSuccess && wardOptions.length === 0) || (!district && !divisions.isPending))
+  // Phường/xã đã lưu mà không có trong danh sách vẫn được giữ làm một lựa chọn, không tự đổi sang giá trị khác.
+  const savedWardMissing = Boolean(values.ward) && wards.isSuccess && !wardOptions.some((ward) => ward.name === values.ward)
 
   function field(name: keyof SaveCustomerAddressRequest) {
     return { value: (values[name] as string | null) ?? '', onChange: (event: { target: { value: string } }) => setValues((current) => ({ ...current, [name]: event.target.value })) }
@@ -38,11 +46,13 @@ function AddressForm({ address, onDone }: { address?: CustomerAddress; onDone: (
         <label className={labelClass}>Tầng<input className={inputClass} {...field('floor')} /></label>
         <label className={labelClass}>Tòa nhà / Chung cư<input className={inputClass} required {...field('buildingName')} /></label>
         <label className={`${labelClass} sm:col-span-2`}>Số nhà, tên đường<input className={inputClass} required {...field('streetAddress')} /></label>
-        <label className={labelClass}>Tỉnh / Thành phố<Select className={inputClass} required value={values.city} onChange={(event) => setValues((current) => ({ ...current, city: event.target.value, district: '' }))}><option value="">{divisions.isPending ? 'Đang tải...' : 'Chọn tỉnh / thành phố'}</option>{divisions.data?.map((division) => <option key={division.code}>{division.name}</option>)}</Select></label>
-        <label className={labelClass}>Quận / Huyện<Select className={inputClass} disabled={!values.city} required {...field('district')}><option value="">Chọn quận / huyện</option>{districts.map((item) => <option key={item.code} value={item.name}>{item.name}{item.isServed ? '' : ' (chưa phục vụ)'}</option>)}</Select></label>
+        <label className={labelClass}>Tỉnh / Thành phố<Select className={inputClass} required value={values.city} onChange={(event) => setValues((current) => ({ ...current, city: event.target.value, district: '', ward: '' }))}><option value="">{divisions.isPending ? 'Đang tải...' : 'Chọn tỉnh / thành phố'}</option>{divisions.data?.map((division) => <option key={division.code}>{division.name}</option>)}</Select></label>
+        <label className={labelClass}>Quận / Huyện<Select className={inputClass} disabled={!values.city} onChange={(event) => setValues((current) => ({ ...current, district: event.target.value, ward: '' }))} required value={values.district}><option value="">Chọn quận / huyện</option>{districts.map((item) => <option key={item.code} value={item.name}>{item.name}{item.isServed ? '' : ' (chưa phục vụ)'}</option>)}</Select></label>
         {district && !district.isServed ? <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900 sm:col-span-2">ABSTRICT chưa có dịch vụ tại {district.name}. Bạn vẫn lưu được địa chỉ này nhưng chưa đặt lịch được ở đây.</p> : null}
         {divisions.isError ? <p className="text-xs text-red-700 sm:col-span-2" role="alert">Không tải được danh sách tỉnh/thành. {bookingErrorMessage(divisions.error)}</p> : null}
-        <label className={labelClass}>Phường / Xã<input className={inputClass} required {...field('ward')} /></label>
+        <label className={labelClass}>Phường / Xã{wardIsFreeText
+          ? <input className={inputClass} placeholder="Nhập tên phường / xã" required {...field('ward')} />
+          : <Select className={inputClass} disabled={!values.district} required {...field('ward')}><option value="">{values.district && wards.isPending ? 'Đang tải...' : 'Chọn phường / xã'}</option>{savedWardMissing ? <option>{values.ward}</option> : null}{wardOptions.map((ward) => <option key={ward.code}>{ward.name}</option>)}</Select>}</label>
         <label className={labelClass}>Hướng dẫn vào nhà<input className={inputClass} placeholder="Gọi lễ tân, gửi xe ở hầm B1..." {...field('accessInstructions')} /></label>
       </div>
       <label className="mt-3 flex items-center gap-2 text-xs text-brand-muted"><input checked={values.isDefault} className="h-4 w-4 accent-brand-charcoal" onChange={(event) => setValues((current) => ({ ...current, isDefault: event.target.checked }))} type="checkbox" />Đặt làm địa chỉ mặc định</label>

@@ -34,6 +34,11 @@ export interface AdministrativeDivision {
   districts: { code: number; name: string; isServed: boolean }[]
 }
 
+export interface AdministrativeWard {
+  code: string
+  name: string
+}
+
 const customerKey = ['customer']
 const addressesKey = [...customerKey, 'addresses']
 
@@ -45,13 +50,25 @@ export function useCustomerAddresses() {
   return useQuery({ queryKey: addressesKey, queryFn: () => apiRequest<CustomerAddress[]>('/customer/addresses') })
 }
 
-export function useServiceAreas() {
-  return useQuery({ queryKey: ['catalog', 'service-areas'], queryFn: () => apiRequest<CatalogServiceArea[]>('/catalog/service-areas'), staleTime: Infinity })
+export function useServiceAreas(enabled = true) {
+  return useQuery({ queryKey: ['catalog', 'service-areas'], queryFn: () => apiRequest<CatalogServiceArea[]>('/catalog/service-areas'), enabled, staleTime: Infinity })
 }
 
 // Toàn bộ tỉnh/thành và quận/huyện cho form địa chỉ; `name` được gửi nguyên làm city/district.
 export function useAdministrativeDivisions() {
-  return useQuery({ queryKey: ['catalog', 'administrative-divisions'], queryFn: () => apiRequest<AdministrativeDivision[]>('/catalog/administrative-divisions'), staleTime: Infinity })
+  return useQuery({ queryKey: ['catalog', 'administrative-divisions'], queryFn: () => apiRequest<AdministrativeDivision[]>('/catalog/administrative-divisions'), retry: false, staleTime: Infinity })
+}
+
+// Phường/xã của một quận/huyện. Mã quận/huyện chỉ duy nhất trong một tỉnh nên luôn truyền cả hai mã.
+// Server trả [] khi chưa tải được dữ liệu; khi đó (hoặc khi lỗi) form cho nhập tay.
+export function useAdministrativeWards(provinceCode?: number, districtCode?: number) {
+  return useQuery({
+    queryKey: ['catalog', 'wards', provinceCode, districtCode],
+    queryFn: () => apiRequest<AdministrativeWard[]>(`/catalog/administrative-divisions/provinces/${provinceCode}/districts/${districtCode}/wards`),
+    enabled: provinceCode !== undefined && districtCode !== undefined,
+    retry: false,
+    staleTime: Infinity,
+  })
 }
 
 export function useSaveCustomerAddress() {

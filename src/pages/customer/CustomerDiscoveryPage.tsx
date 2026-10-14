@@ -1,8 +1,10 @@
 import { BadgeCheck, CalendarDays, ChevronLeft, ChevronRight, Clock3, MapPin, ShieldCheck, Sparkles } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
+import { useAdministrativeDivisions, useServiceAreas } from '../../features/customer/api/addresses'
 import { serviceLabels, useFreelancers } from '../../features/customer/api/freelancers'
 import { CustomerContainer } from '../../features/customer/components/CustomerPrimitives'
 import { ProviderCard } from '../../features/customer/components/ProviderCard'
+import { Combobox } from '../../shared/ui/Combobox'
 import { Select } from '../../shared/ui/Select'
 
 const filterClass = 'h-11 w-full rounded-xl border border-brand-border bg-white px-3.5 text-sm text-brand-charcoal outline-none transition focus:border-brand-charcoal focus:ring-1 focus:ring-brand-charcoal'
@@ -27,12 +29,34 @@ export function CustomerDiscoveryPage() {
     pageSize: 12,
   })
 
-  function updateParam(name: string, value: string, resetPage = true) {
+  // Đủ 63 tỉnh/thành lấy từ danh mục hành chính; quận/huyện chưa có dịch vụ được ghi chú và xếp cuối.
+  // Backend chưa có danh mục này (bản cũ trả 404) thì dùng tạm danh sách khu vực đang phục vụ.
+  const divisions = useAdministrativeDivisions()
+  const areas = useServiceAreas(divisions.isError)
+  const activeAreas = (areas.data ?? []).filter((area) => area.isActive)
+  const unique = (names: string[]) => [...new Set(names)].sort((x, y) => x.localeCompare(y, 'vi', { numeric: true })).map((name) => ({ value: name, label: name }))
+  const cityOptions = divisions.data
+    ? divisions.data.map((division) => ({ value: division.name, label: division.name }))
+    : unique(activeAreas.map((area) => area.city))
+  const districtOptions = divisions.data
+    ? [...(divisions.data.find((division) => division.name === city)?.districts ?? [])]
+      .sort((x, y) => Number(y.isServed) - Number(x.isServed))
+      .map((item) => ({ value: item.name, label: item.name, hint: item.isServed ? undefined : 'chưa phục vụ' }))
+    : unique(activeAreas.filter((area) => area.city === city).map((area) => area.district))
+  const areasStatus = divisions.isPending || (divisions.isError && areas.isPending) ? 'Đang tải...' : divisions.isError && areas.isError ? 'Không tải được danh sách khu vực' : undefined
+
+  function updateParams(changes: Record<string, string>, resetPage = true) {
     const next = new URLSearchParams(searchParams)
-    if (value) next.set(name, value)
-    else next.delete(name)
+    for (const [name, value] of Object.entries(changes)) {
+      if (value) next.set(name, value)
+      else next.delete(name)
+    }
     if (resetPage) next.set('page', '1')
     setSearchParams(next)
+  }
+
+  function updateParam(name: string, value: string, resetPage = true) {
+    updateParams({ [name]: value }, resetPage)
   }
 
   const items = data?.items ?? []
@@ -45,8 +69,8 @@ export function CustomerDiscoveryPage() {
           <div className="max-w-3xl"><p className="text-sm font-semibold text-brand-purple">Khám phá dịch vụ</p><h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-brand-charcoal sm:text-4xl">Tìm đối tác phù hợp cho căn hộ của bạn</h1><p className="mt-3 text-base leading-7 text-brand-muted">Đối tác đã được kiểm định danh tính, kỹ năng chuyên môn và đánh giá thực tế từ khách hàng ABSTRICT.</p></div>
           <div className="mt-7 grid gap-3 rounded-2xl bg-[#f7f8fa] p-4 sm:grid-cols-2 lg:grid-cols-3">
             <label className="text-xs font-semibold text-brand-charcoal"><span className="mb-1.5 flex items-center gap-1.5"><Sparkles aria-hidden="true" className="h-3.5 w-3.5 text-brand-muted" />Dịch vụ</span><Select className={filterClass} onChange={(event) => updateParam('serviceCode', event.target.value)} value={serviceCode}><option value="">Tất cả dịch vụ</option>{Object.entries(serviceLabels).map(([code, label]) => <option key={code} value={code}>{label}</option>)}</Select></label>
-            <label className="text-xs font-semibold text-brand-charcoal"><span className="mb-1.5 flex items-center gap-1.5"><MapPin aria-hidden="true" className="h-3.5 w-3.5 text-brand-muted" />Thành phố</span><input className={filterClass} defaultValue={city} key={`city-${city}`} onBlur={(event) => updateParam('city', event.currentTarget.value.trim())} placeholder="Hồ Chí Minh" /></label>
-            <label className="text-xs font-semibold text-brand-charcoal"><span className="mb-1.5 flex items-center gap-1.5"><MapPin aria-hidden="true" className="h-3.5 w-3.5 text-brand-muted" />Quận / Huyện</span><input className={filterClass} defaultValue={district} key={`district-${district}`} onBlur={(event) => updateParam('district', event.currentTarget.value.trim())} placeholder="Quận 1" /></label>
+            <label className="text-xs font-semibold text-brand-charcoal"><span className="mb-1.5 flex items-center gap-1.5"><MapPin aria-hidden="true" className="h-3.5 w-3.5 text-brand-muted" />Tỉnh / Thành phố</span><Combobox className={filterClass} emptyText={areasStatus} onChange={(value) => updateParams({ city: value, district: '' })} options={cityOptions} placeholder="Tất cả tỉnh / thành" value={city} /></label>
+            <label className="text-xs font-semibold text-brand-charcoal"><span className="mb-1.5 flex items-center gap-1.5"><MapPin aria-hidden="true" className="h-3.5 w-3.5 text-brand-muted" />Quận / Huyện</span><Combobox className={filterClass} disabled={!city} emptyText={areasStatus} onChange={(value) => updateParam('district', value)} options={districtOptions} placeholder={city ? 'Tất cả quận / huyện' : 'Chọn thành phố trước'} value={district} /></label>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             <button aria-pressed={minRating === 4.5} className={chipClass(minRating === 4.5)} onClick={() => updateParam('minRating', minRating === 4.5 ? '' : '4.5')} type="button">Đánh giá 4.5★ trở lên</button>
