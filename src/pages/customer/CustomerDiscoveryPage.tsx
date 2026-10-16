@@ -1,5 +1,6 @@
 import { BadgeCheck, CalendarDays, ChevronLeft, ChevronRight, Clock3, MapPin, ShieldCheck, Sparkles } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
+import { useServiceCategories } from '../../features/catalog/api/catalog'
 import { useAdministrativeDivisions, useServiceAreas } from '../../features/customer/api/addresses'
 import { serviceLabels, useFreelancers } from '../../features/customer/api/freelancers'
 import { CustomerContainer } from '../../features/customer/components/CustomerPrimitives'
@@ -34,6 +35,11 @@ export function CustomerDiscoveryPage() {
   const divisions = useAdministrativeDivisions()
   const areas = useServiceAreas(divisions.isError)
   const activeAreas = (areas.data ?? []).filter((area) => area.isActive)
+  // Ưu tiên danh mục dịch vụ từ server; trong lúc tải hoặc khi lỗi thì dùng map nhúng làm dự phòng.
+  const categories = useServiceCategories()
+  const serviceOptions = categories.data
+    ? categories.data.filter((category) => category.isActive).map((category) => ({ value: category.code, label: category.name }))
+    : Object.entries(serviceLabels).map(([value, label]) => ({ value, label }))
   const unique = (names: string[]) => [...new Set(names)].sort((x, y) => x.localeCompare(y, 'vi', { numeric: true })).map((name) => ({ value: name, label: name }))
   const cityOptions = divisions.data
     ? divisions.data.map((division) => ({ value: division.name, label: division.name }))
@@ -68,7 +74,7 @@ export function CustomerDiscoveryPage() {
         <CustomerContainer>
           <div className="max-w-3xl"><p className="text-sm font-semibold text-brand-purple">Khám phá dịch vụ</p><h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-brand-charcoal sm:text-4xl">Tìm đối tác phù hợp cho căn hộ của bạn</h1><p className="mt-3 text-base leading-7 text-brand-muted">Đối tác đã được kiểm định danh tính, kỹ năng chuyên môn và đánh giá thực tế từ khách hàng ABSTRICT.</p></div>
           <div className="mt-7 grid gap-3 rounded-2xl bg-[#f7f8fa] p-4 sm:grid-cols-2 lg:grid-cols-3">
-            <label className="text-xs font-semibold text-brand-charcoal"><span className="mb-1.5 flex items-center gap-1.5"><Sparkles aria-hidden="true" className="h-3.5 w-3.5 text-brand-muted" />Dịch vụ</span><Select className={filterClass} onChange={(event) => updateParam('serviceCode', event.target.value)} value={serviceCode}><option value="">Tất cả dịch vụ</option>{Object.entries(serviceLabels).map(([code, label]) => <option key={code} value={code}>{label}</option>)}</Select></label>
+            <label className="text-xs font-semibold text-brand-charcoal"><span className="mb-1.5 flex items-center gap-1.5"><Sparkles aria-hidden="true" className="h-3.5 w-3.5 text-brand-muted" />Dịch vụ</span><Select className={filterClass} onChange={(event) => updateParam('serviceCode', event.target.value)} value={serviceCode}><option value="">Tất cả dịch vụ</option>{serviceOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</Select></label>
             <label className="text-xs font-semibold text-brand-charcoal"><span className="mb-1.5 flex items-center gap-1.5"><MapPin aria-hidden="true" className="h-3.5 w-3.5 text-brand-muted" />Tỉnh / Thành phố</span><Combobox className={filterClass} emptyText={areasStatus} onChange={(value) => updateParams({ city: value, district: '' })} options={cityOptions} placeholder="Tất cả tỉnh / thành" value={city} /></label>
             <label className="text-xs font-semibold text-brand-charcoal"><span className="mb-1.5 flex items-center gap-1.5"><MapPin aria-hidden="true" className="h-3.5 w-3.5 text-brand-muted" />Quận / Huyện</span><Combobox className={filterClass} disabled={!city} emptyText={areasStatus} onChange={(value) => updateParam('district', value)} options={districtOptions} placeholder={city ? 'Tất cả quận / huyện' : 'Chọn thành phố trước'} value={district} /></label>
           </div>

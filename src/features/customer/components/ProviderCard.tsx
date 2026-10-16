@@ -1,10 +1,13 @@
 import { CheckCircle2, Clock3, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useServiceCategories } from '../../catalog/api/catalog'
 import { formatVnd } from '../../../shared/lib/format-currency'
 import { initialsOf, serviceLabel, type FreelancerSummary } from '../api/freelancers'
 
 export function ProviderCard({ provider }: { provider: FreelancerSummary }) {
   const profilePath = `/discover/${provider.providerId}`
+  const categories = useServiceCategories()
+  const serviceLabelOf = (code: string) => categories.data?.find((category) => category.code === code)?.name ?? serviceLabel(code)
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-brand-border bg-white shadow-[0_2px_8px_rgba(23,25,28,0.04)] transition hover:-translate-y-0.5 hover:shadow-lg">
@@ -22,7 +25,7 @@ export function ProviderCard({ provider }: { provider: FreelancerSummary }) {
           <span className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-800"><Star aria-hidden="true" className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />{provider.averageRating}<span className="font-normal text-brand-muted">({provider.ratingCount})</span></span>
         </div>
         {provider.bio ? <p className="mt-3 line-clamp-2 text-xs leading-5 text-brand-muted">{provider.bio}</p> : null}
-        <div className="mt-3 flex flex-wrap gap-1.5">{provider.serviceCodes.map((code) => <span className="rounded-md bg-slate-100 px-2 py-1 text-xs text-slate-600" key={code}>{serviceLabel(code)}</span>)}</div>
+        <div className="mt-3 flex flex-wrap gap-1.5">{provider.serviceCodes.map((code) => <span className="rounded-md bg-slate-100 px-2 py-1 text-xs text-slate-600" key={code}>{serviceLabelOf(code)}</span>)}</div>
         <p className={`mt-4 flex items-center gap-1.5 border-t border-brand-border pt-3 text-xs font-medium ${provider.isAcceptingBookings ? 'text-emerald-700' : 'text-brand-muted'}`}><Clock3 aria-hidden="true" className="h-4 w-4" />{provider.isAcceptingBookings ? 'Đang nhận đặt lịch' : 'Hiện chưa nhận đặt lịch'}</p>
       </div>
 

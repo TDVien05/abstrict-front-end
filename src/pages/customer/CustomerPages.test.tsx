@@ -51,6 +51,7 @@ describe('customer booking screens', () => {
       if (url.includes('/catalog/administrative-divisions')) return jsonResponse(divisions)
       if (url.includes('/catalog/service-areas')) return jsonResponse([{ id: 'a1', city: 'Hồ Chí Minh', district: 'Quận 1', wardOrComplex: null, isActive: true }, { id: 'a2', city: 'Hồ Chí Minh', district: 'Quận 3', wardOrComplex: null, isActive: true }])
       if (url.includes('/checklist')) return jsonResponse({ templateId: 't1', name: 'Dọn dẹp', version: 1, items: [{ id: 'i1', parentItemId: null, areaName: 'Bếp', description: 'Lau tủ lạnh', sortOrder: 1, isRequired: false }] })
+      if (url.includes('/catalog/service-categories')) return jsonResponse([{ id: 'cat-1', code: 'CLEANING', name: 'Dọn dẹp nhà cửa', description: null, isActive: true }, { id: 'cat-2', code: 'COOKING', name: 'Nấu ăn gia đình', description: null, isActive: true }])
       if (url.includes('/customer/addresses')) return jsonResponse([{ id: 'addr-1', label: 'Nhà', apartmentNumber: 'A-1205', floor: '12', buildingName: 'Vinhomes', streetAddress: '12 Lê Lợi', ward: 'Bến Nghé', district: 'Quận 1', city: 'Hồ Chí Minh', accessInstructions: null, isDefault: true }])
       if (url.includes('/bookings/quote')) return jsonResponse({ unitPriceVnd: 80000, durationMinutes: 120, baseAmountVnd: 160000, surchargeAmountVnd: 0, depositAmountVnd: 24000, depositPercent: 15, remainingAmountVnd: 136000, holdMinutes: 15 })
       if (url.endsWith('/bookings') && init?.method === 'POST') return jsonResponse(booking, 201)

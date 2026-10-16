@@ -33,6 +33,24 @@ function stubBookings(refusal?: { status: number; code: string }) {
   return fetchMock
 }
 
+const kycDocuments = [
+  { id: 'd1', type: 'CitizenIdFront', status: 'Pending', originalFileName: 'front.jpg', uploadedAtUtc: '2026-10-12T09:00:00+00:00', rejectionReason: null },
+  { id: 'd2', type: 'CitizenIdBack', status: 'Pending', originalFileName: 'back.jpg', uploadedAtUtc: '2026-10-12T09:00:00+00:00', rejectionReason: null },
+  { id: 'd3', type: 'FaceVerification', status: 'Pending', originalFileName: 'face.jpg', uploadedAtUtc: '2026-10-12T09:00:00+00:00', rejectionReason: null },
+]
+
+function stubKyc(kyc: unknown) {
+  const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input)
+    if (url.includes('/auth/refresh')) return new Response(JSON.stringify({ status: 401, code: 'SESSION_EXPIRED' }), { status: 401 })
+    // Trả cùng cấu trúc hồ sơ cho cả GET và PUT profile.
+    if (url.includes('/freelancer/kyc/profile') && init?.method === 'PUT') return new Response(JSON.stringify(kyc))
+    return new Response(JSON.stringify(kyc))
+  })
+  vi.stubGlobal('fetch', fetchMock)
+  return fetchMock
+}
+
 describe('Partner screens', () => {
   it('lists bookings from the API and confirms one', async () => {
     const fetchMock = stubBookings()
@@ -71,25 +89,47 @@ describe('Partner screens', () => {
     expect(screen.queryByRole('status')).toBeNull()
   })
 
-  it('validates empty KYC fields before attempting submission', async () => {
+  it('loads the KYC dossier and saves the profile as a draft', async () => {
+    const fetchMock = stubKyc({ status: 'NotStarted', canEdit: true, profile: null, documents: [], feedback: null, submittedAtUtc: null })
     renderPartner(<PartnerRegistrationPage />)
-    fireEvent.click(screen.getByRole('button', { name: 'Gửi hồ sơ thẩm định KYC' }))
-    await waitFor(() => expect(screen.getByText('Số điện thoại không hợp lệ.')).toBeTruthy())
-    expect(screen.getByText('Chọn ít nhất một kỹ năng.')).toBeTruthy()
+    fireEvent.change(await screen.findByLabelText(/Họ và tên khai sinh/), { target: { value: 'Nguyễn Văn A' } })
+    fireEvent.change(screen.getByLabelText(/Ngày tháng năm sinh/), { target: { value: '1995-05-01' } })
+    fireEvent.change(screen.getByLabelText(/Số CCCD/), { target: { value: '079195001234' } })
+    fireEvent.change(screen.getByLabelText(/Địa chỉ thường trú/), { target: { value: '12 Lê Lợi, Quận 1' } })
+    fireEvent.change(screen.getByLabelText(/Địa chỉ tạm trú/), { target: { value: '34 Nguyễn Huệ, Quận 1' } })
+    fireEvent.click(screen.getByLabelText(/Tôi cam kết/))
+    fireEvent.click(screen.getByRole('button', { name: /Lưu bản nháp/ }))
+    await waitFor(() => {
+      const call = fetchMock.mock.calls.find(([input, init]) => String(input).includes('/freelancer/kyc/profile') && init?.method === 'PUT')
+      expect(call).toBeTruthy()
+      expect(JSON.parse(String(call?.[1]?.body))).toMatchObject({ legalFullName: 'Nguyễn Văn A', dateOfBirth: '1995-05-01', gender: 'Female', citizenIdNumber: '079195001234', experienceYears: 0 })
+    })
+  })
+
+  it('validates CCCD and consent before submitting a complete dossier', async () => {
+    stubKyc({ status: 'Draft', canEdit: true, profile: { legalFullName: 'Nguyễn Văn A', dateOfBirth: '1995-05-01', gender: 'Female', citizenIdLast4: '1234', permanentAddress: '12 Lê Lợi, Quận 1', currentAddress: '34 Nguyễn Huệ, Quận 1', experienceYears: 2 }, documents: kycDocuments, feedback: null, submittedAtUtc: null })
+    renderPartner(<PartnerRegistrationPage />)
+    fireEvent.click(await screen.findByRole('button', { name: /Gửi hồ sơ thẩm định KYC/ }))
+    await waitFor(() => expect(screen.getByText('Số CCCD gồm đúng 12 chữ số.')).toBeTruthy())
     expect(screen.getByText('Bạn cần xác nhận thông tin trước khi gửi.')).toBeTruthy()
+  })
+
+  it('locks the form while the dossier is awaiting review', async () => {
+    stubKyc({ status: 'Submitted', canEdit: false, profile: { legalFullName: 'Nguyễn Văn A', dateOfBirth: '1995-05-01', gender: 'Female', citizenIdLast4: '1234', permanentAddress: '12 Lê Lợi, Quận 1', currentAddress: '34 Nguyễn Huệ, Quận 1', experienceYears: 2 }, documents: kycDocuments, feedback: null, submittedAtUtc: '2026-10-12T09:00:00+00:00' })
+    renderPartner(<PartnerRegistrationPage />)
+    expect(await screen.findByText(/đang chờ ABSTRICT xét duyệt/)).toBeTruthy()
+    expect(screen.queryByRole('button', { name: /Gửi hồ sơ thẩm định KYC/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /Lưu bản nháp/ })).toBeNull()
   })
 })
 
 describe('KYC document validation', () => {
-  it('rejects unsupported or oversized documents and PDFs as identity photos', () => {
-    const pdf = new File(['document'], 'cccd.pdf', { type: 'application/pdf' })
-    const exe = new File(['document'], 'file.exe', { type: 'application/octet-stream' })
-    const huge = new File([new Uint8Array(15 * 1024 * 1024 + 1)], 'large.jpg', { type: 'image/jpeg' })
-    const photo = new File(['photo'], 'photo.jpg', { type: 'image/jpeg' })
-    expect(partnerRegistrationSchema.shape.front.safeParse([pdf]).success).toBe(false)
-    expect(partnerRegistrationSchema.shape.health.safeParse([exe]).success).toBe(false)
-    expect(partnerRegistrationSchema.shape.back.safeParse([huge]).success).toBe(false)
-    expect(partnerRegistrationSchema.shape.front.safeParse([photo]).success).toBe(true)
-    expect(partnerRegistrationSchema.shape.health.safeParse([pdf]).success).toBe(true)
+  it('rejects unsupported or oversized files and non-images', () => {
+    const pick = (size: number, type: string) => [{ size, type }]
+    expect(partnerRegistrationSchema.shape.front.safeParse(pick(1000, 'application/pdf')).success).toBe(false)
+    expect(partnerRegistrationSchema.shape.back.safeParse(pick(1000, 'application/octet-stream')).success).toBe(false)
+    expect(partnerRegistrationSchema.shape.portrait.safeParse(pick(5 * 1024 * 1024 + 1, 'image/jpeg')).success).toBe(false)
+    expect(partnerRegistrationSchema.shape.front.safeParse(pick(1000, 'image/jpeg')).success).toBe(true)
+    expect(partnerRegistrationSchema.shape.portrait.safeParse(undefined).success).toBe(true)
   })
 })

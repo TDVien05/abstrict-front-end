@@ -3,9 +3,9 @@ import { kycFocus } from './KycPrimitives'
 
 export function KycSidebar({ progress, documentsSelected }: { progress: number; documentsSelected: boolean }) {
   const checkpoints = [
-    ['Tính xác thực CCCD', 'Chờ đối chiếu'],
-    ['Khớp khuôn mặt Face ID', 'Chưa xác thực'],
-    ['Sức khỏe & tư pháp', documentsSelected ? 'Đã chọn tệp' : 'Chờ bổ sung'],
+    ['Thông tin cá nhân', 'Lưu trước khi gửi'],
+    ['Ảnh CCCD & chân dung', documentsSelected ? 'Đã đủ ảnh' : 'Chờ bổ sung'],
+    ['Kết quả thẩm định', 'Do ABSTRICT duyệt'],
   ]
   return (
     <aside aria-label="Thông tin thẩm định và hỗ trợ" className="min-w-0 space-y-4 lg:sticky lg:top-[216px] lg:z-10 lg:col-span-4 lg:self-start">

@@ -23,7 +23,7 @@ export function KycSection({ id, title, note, icon: Icon, children, referenceLay
   )
 }
 
-type TextField = 'fullName' | 'phone' | 'birthDate' | 'permanentAddress' | 'currentAddress' | 'bankAccount' | 'accountName'
+type TextField = 'fullName' | 'birthDate' | 'permanentAddress' | 'currentAddress' | 'citizenIdNumber' | 'experienceYears'
 
 export function KycField({ name, label, hint, ...props }: InputHTMLAttributes<HTMLInputElement> & { name: TextField; label: string; hint?: string }) {
   const { register, formState: { errors } } = useFormContext<PartnerRegistrationValues>()
@@ -48,9 +48,9 @@ function PreviewImage({ file, example, alt, className }: { file?: File; example:
   return <img ref={ref} src={example} alt={file ? `Xem trước ${file.name}` : alt} className={className} />
 }
 
-type UploadField = 'front' | 'back' | 'portrait' | 'health' | 'judicial'
+type UploadField = 'front' | 'back' | 'portrait'
 
-export function KycUpload({ name, label, example, children, compact = false, documentRow = false, icon: Icon = FileText, badge }: PropsWithChildren<{ name: UploadField; label: string; example?: string; compact?: boolean; documentRow?: boolean; icon?: typeof FileText; badge?: string }>) {
+export function KycUpload({ name, label, example, children, onSelect, compact = false, documentRow = false, icon: Icon = FileText, badge }: PropsWithChildren<{ name: UploadField; label: string; example?: string; onSelect?: (file: File) => void; compact?: boolean; documentRow?: boolean; icon?: typeof FileText; badge?: string }>) {
   const { register, control, setValue, formState: { errors } } = useFormContext<PartnerRegistrationValues>()
   const files = useWatch({ control, name })
   const file = files?.[0]
@@ -62,7 +62,7 @@ export function KycUpload({ name, label, example, children, compact = false, doc
   return (
     <div className={`flex min-w-0 flex-col ${compact ? '' : 'gap-3'}`}>
       {!compact && <div className="flex items-center justify-between gap-2"><label htmlFor={name} className="flex min-w-0 items-center gap-2 text-sm font-semibold">{!example && <Icon aria-hidden className="h-5 w-5 shrink-0 text-brand-muted" />}{label}</label><span className="shrink-0 rounded bg-white px-2 py-0.5 text-xs font-medium text-brand-blue-ink">{badge ?? (file ? 'Đã chọn tệp' : 'Chưa tải lên')}</span></div>}
-      <input {...registration} ref={(element) => { registration.ref(element); inputRef.current = element }} id={name} aria-label={label} aria-invalid={Boolean(errors[name])} aria-describedby={`${name}-hint${errors[name] ? ` ${name}-error` : ''}`} className="sr-only" type="file" accept={photo ? 'image/jpeg,image/png' : 'image/jpeg,image/png,application/pdf'} />
+      <input {...registration} onChange={(event) => { registration.onChange(event); const picked = event.target.files?.[0]; if (picked) onSelect?.(picked) }} ref={(element) => { registration.ref(element); inputRef.current = element }} id={name} aria-label={label} aria-invalid={Boolean(errors[name])} aria-describedby={`${name}-hint${errors[name] ? ` ${name}-error` : ''}`} className="sr-only" type="file" accept={photo ? 'image/jpeg,image/png' : 'image/jpeg,image/png,application/pdf'} />
       {example ? (
         <div className={`group relative rounded-xl bg-brand-sand ${compact ? 'h-28 w-28' : 'h-44 overflow-hidden p-2'}`}>
           <PreviewImage key={file ? `${file.name}-${file.lastModified}` : 'example'} file={file} example={example} alt={`${label} — ảnh minh họa`} className="h-full w-full rounded-lg object-cover" />
@@ -77,14 +77,10 @@ export function KycUpload({ name, label, example, children, compact = false, doc
           {documentRow ? <><span className="flex min-w-0 items-center gap-3"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-brand-sand"><FileText aria-hidden className="h-[22px] w-[22px]" /></span><span className="min-w-0"><span className="block truncate text-sm font-semibold">{file?.name ?? 'Chọn tệp giấy khám sức khỏe'}</span><span id={`${name}-hint`} className="block text-xs text-brand-muted">{file ? `${(file.size / 1024 / 1024).toFixed(1)} MB` : 'PDF, PNG, JPG · Tối đa 15 MB'}</span></span></span><FileUp aria-hidden className="h-[18px] w-[18px] shrink-0 text-brand-blue-ink" /></> : <><span className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue-pastel-soft text-brand-blue-ink"><CloudUpload aria-hidden className="h-5 w-5" /></span><span className="max-w-full truncate text-sm font-semibold">{file?.name ?? 'Kéo thả tệp hoặc chọn file'}</span><span id={`${name}-hint`} className="mt-0.5 text-xs text-brand-muted">PDF, PNG, JPG (Tối đa 15MB) hoặc phiếu điện tử VNeID mức 2</span></>}
         </button>
       )}
-      {example && <p id={`${name}-hint`} className="sr-only">{file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)} MB` : 'Ảnh mẫu minh họa · JPG, PNG · tối đa 15 MB'}</p>}
+      {example && <p id={`${name}-hint`} className="sr-only">{file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)} MB` : 'Ảnh mẫu minh họa · JPG, PNG · tối đa 5 MB'}</p>}
       {errors[name] && <p id={`${name}-error`} role="alert" className="mt-2 text-sm text-red-700">{errors[name]?.message}</p>}
       {children}
       {example && !compact && <dialog ref={dialogRef} aria-labelledby={`${name}-preview-title`} className="fixed inset-0 m-auto max-h-[90vh] w-[calc(100%-3rem)] max-w-3xl overflow-auto rounded-2xl bg-white p-6 backdrop:bg-black/50"><div className="mb-4 flex items-center justify-between gap-3"><h2 id={`${name}-preview-title`} className="text-xl font-semibold">{label}</h2><button type="button" aria-label="Đóng ảnh xem trước" className={`${kycAction} ${kycFocus}`} onClick={() => dialogRef.current?.close()}><X aria-hidden className="h-5 w-5" /></button></div><PreviewImage key={file ? `${file.name}-${file.lastModified}` : 'example'} file={file} example={example} alt={label} className="max-h-[65vh] w-full object-contain" />{!file && <p className="mt-3 text-sm text-brand-muted">Ảnh mẫu minh họa từ thiết kế, không phải giấy tờ đã xác minh.</p>}</dialog>}
     </div>
   )
-}
-
-export function KycFaceStatus() {
-  return <div className="flex w-full min-w-0 flex-1 flex-col gap-2 text-left"><div className="flex flex-col justify-between gap-1 sm:flex-row sm:items-center"><div className="min-w-0"><h3 className="text-sm font-semibold">Sinh trắc học nhận diện khuôn mặt</h3><p className="text-sm text-brand-muted">Đối chiếu ảnh chân dung với ảnh trên căn cước công dân.</p></div><span className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-full bg-white px-3 py-1 text-sm text-brand-blue-ink shadow-sm sm:self-auto"><span aria-hidden className="h-2 w-2 rounded-full bg-brand-blue-ink" />Face Match: Chưa xác thực</span></div><div aria-hidden className="h-2 w-full overflow-hidden rounded-full bg-brand-border" /><div className="flex flex-wrap items-center justify-between gap-1 pt-0.5 text-xs text-brand-muted"><span>Ngưỡng chấp thuận hệ thống: ≥85.0%</span><span className="font-medium text-brand-blue-ink">Trạng thái: Chờ thẩm định</span></div></div>
 }
