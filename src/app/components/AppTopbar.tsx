@@ -25,6 +25,7 @@ const navByActor: Record<Actor | 'public', { label: string; to: string }[]> = {
     { label: 'Cổng đối tác', to: '/partners/register' },
   ],
   freelancer: [
+    { label: 'Hồ sơ KYC', to: '/partners/register/kyc' },
     { label: 'Tổng quan', to: '/partner/dashboard' },
     { label: 'Đơn đặt lịch', to: '/partner/orders' },
     { label: 'Lịch làm việc', to: '/partner/schedule' },
@@ -36,7 +37,8 @@ const navByActor: Record<Actor | 'public', { label: string; to: string }[]> = {
     { label: 'Gói hiển thị', to: '/partner/plans' },
   ],
   admin: [
-    { label: 'Duyệt hồ sơ', to: '/admin/approvals' },
+    { label: 'Duyệt KYC', to: '/admin/kyc' },
+    { label: 'Duyệt doanh nghiệp', to: '/admin/approvals' },
     { label: 'Khiếu nại', to: '/admin/disputes' },
   ],
 }

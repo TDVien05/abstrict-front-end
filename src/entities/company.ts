@@ -1,4 +1,3 @@
-import { apiBlob } from '../shared/api/http-client'
 import { ApiError } from '../shared/api/problem-details'
 
 export type CompanyOnboardingStep = 'Company' | 'Representative' | 'ServiceAreas' | 'Documents' | 'Submit' | 'AwaitingReview' | 'Completed' | 'Suspended'
@@ -102,15 +101,4 @@ export function companyErrorMessage(error: unknown) {
   return 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối và thử lại.'
 }
 
-// Giấy tờ chỉ phát qua endpoint có phân quyền, nên tải bằng token rồi mở blob. Tab được mở ngay trong lúc bấm để không bị chặn popup.
-export async function openDocumentInNewTab(contentPath: string) {
-  const tab = window.open('', '_blank')
-  try {
-    const url = URL.createObjectURL(await apiBlob(contentPath))
-    if (tab) tab.location.href = url
-    else window.location.assign(url)
-  } catch (error) {
-    tab?.close()
-    throw error
-  }
-}
+export { openDocumentInNewTab } from '../shared/api/document-content'

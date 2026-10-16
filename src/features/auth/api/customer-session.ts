@@ -24,7 +24,7 @@ export interface LoginResponse {
 
 const actorByRole: Record<LoginResponse['role'], Actor> = { Customer: 'customer', Freelancer: 'freelancer', Company: 'company', Admin: 'admin' }
 
-const kycAnchorByStep: Partial<Record<FreelancerOnboardingStep, string>> = { Profile: 'kyc-1', Documents: 'kyc-2', Submit: 'kyc-4', AwaitingReview: 'kyc-4' }
+const kycAnchorByStep: Partial<Record<FreelancerOnboardingStep, string>> = { Profile: 'kyc-1', Documents: 'kyc-2', Submit: 'kyc-3', AwaitingReview: 'kyc-3' }
 
 // /auth/login và /auth/refresh dùng chung cho mọi vai trò và trả cùng cấu trúc.
 export function loginCustomer(request: CustomerLoginRequest) {

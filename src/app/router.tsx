@@ -7,7 +7,7 @@ import { PartnerLayout } from './layouts/PartnerLayout'
 import { PublicLayout } from './layouts/PublicLayout'
 import { RootLayout } from './layouts/RootLayout'
 import { RouteTransition } from '../shared/ui/RouteTransition'
-import { AdminCompaniesPage, AdminCompanyDetailPage, AdminDisputesPage } from '../pages/admin/AdminPages'
+import { AdminCompaniesPage, AdminCompanyDetailPage, AdminDisputesPage, AdminKycDetailPage, AdminKycPage } from '../pages/admin/AdminPages'
 import { BookingCreatePage, CustomerDiscoveryPage, CustomerProviderPage, OrderDetailPage, OrdersPage, ProfilePage } from '../pages/customer/CustomerPages'
 import {
   PartnerAvailabilityPage,
@@ -108,6 +108,8 @@ export const router = createBrowserRouter([
         children: [
           { path: 'admin/approvals', element: <AdminCompaniesPage /> },
           { path: 'admin/companies/:providerId', element: <AdminCompanyDetailPage /> },
+          { path: 'admin/kyc', element: <AdminKycPage /> },
+          { path: 'admin/kyc/:providerId', element: <AdminKycDetailPage /> },
           { path: 'admin/disputes', element: <AdminDisputesPage /> },
         ],
       },
