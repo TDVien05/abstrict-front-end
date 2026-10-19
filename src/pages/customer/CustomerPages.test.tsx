@@ -40,6 +40,9 @@ describe('customer booking screens', () => {
       if (url.includes('/availability')) {
         return jsonResponse({ providerId, timeZone: 'Asia/Ho_Chi_Minh', slotStepMinutes: 30, minimumDurationMinutes: 120, days: [{ date: '2099-01-01', free: [{ startsAtUtc: '2099-01-01T01:00:00+00:00', endsAtUtc: '2099-01-01T05:00:00+00:00' }], busy: [] }] })
       }
+      if (url.includes(`/freelancers/${providerId}/ratings`)) {
+        return jsonResponse({ items: [], page: 1, totalItems: 0, totalPages: 0 })
+      }
       if (url.includes(`/freelancers/${providerId}`)) {
         return jsonResponse({
           providerId, displayName: 'Nguyễn Thị Lan', bio: 'Dọn dẹp gọn gàng.', gender: 'Female', averageRating: 4.8, ratingCount: 42, completedBookingCount: 38, experienceYears: 6, isAcceptingBookings: true,
@@ -89,15 +92,20 @@ describe('customer booking screens', () => {
     await waitFor(() => expect(fetchMock.mock.calls.some(([input]) => decodeURIComponent(String(input)).replace(/\+/g, ' ').includes('city=Hồ Chí Minh'))).toBe(true))
     expect((screen.getAllByRole('combobox')[2] as HTMLInputElement).disabled).toBe(false)
 
+    // Trang hồ sơ chỉ hiển thị thông tin + nút đặt lịch, không có time picker
     fireEvent.click((await screen.findAllByRole('link', { name: 'Xem hồ sơ' }))[0])
     expect(await screen.findByText('Dịch vụ & bảng giá')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: '08:00' })).toBeNull()
+
+    // Bấm "Đặt lịch ngay" → trang booking, bước 1: chọn dịch vụ + giờ
+    fireEvent.click(screen.getByRole('link', { name: /Đặt lịch ngay/ }))
 
     // Lịch rảnh 08:00–12:00 giờ VN: mặc định chọn ca tối thiểu 2 giờ đầu tiên.
     expect((await screen.findByRole('button', { name: '08:00' })).getAttribute('aria-pressed')).toBe('true')
     expect(screen.getByRole('button', { name: /2 giờ.*đến 10:00/ }).getAttribute('aria-pressed')).toBe('true')
     expect(screen.queryByRole('button', { name: '10:30' })).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: /Tiếp tục đặt lịch/ }))
-    expect(await screen.findByRole('heading', { name: 'Xác nhận đặt dịch vụ & ký quỹ' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: /Tiếp tục/ }))
+    expect(await screen.findByRole('heading', { name: 'Xác nhận & đặt cọc' })).toBeTruthy()
 
     fireEvent.click(await screen.findByLabelText(/Lau tủ lạnh/))
     await screen.findByText('Đặt cọc ngay (15%)')

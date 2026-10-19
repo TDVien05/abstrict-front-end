@@ -1,12 +1,13 @@
-import { Outlet } from 'react-router-dom'
-import { AppTopbar } from '../components/AppTopbar'
-import { RouteTransition } from '../../shared/ui/RouteTransition'
+import { Building2, LayoutDashboard, Scale, ShieldCheck } from 'lucide-react'
+import { SidebarShell, type SidebarItem } from '../components/SidebarShell'
+
+const items: SidebarItem[] = [
+  { label: 'Tổng quan', to: '/admin', icon: LayoutDashboard, end: true },
+  { label: 'Duyệt KYC', to: '/admin/kyc', icon: ShieldCheck },
+  { label: 'Duyệt doanh nghiệp', to: '/admin/approvals', icon: Building2 },
+  { label: 'Khiếu nại', to: '/admin/disputes', icon: Scale },
+]
 
 export function AdminLayout() {
-  return (
-    <div className="min-h-screen bg-slate-100">
-      <AppTopbar actor="admin" />
-      <RouteTransition><Outlet /></RouteTransition>
-    </div>
-  )
+  return <SidebarShell items={items} navLabel="Điều hướng quản trị" roleLabel="Quản trị viên" />
 }

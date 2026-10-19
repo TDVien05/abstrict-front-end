@@ -13,6 +13,7 @@ const chipClass = (active: boolean) => `rounded-full px-3 py-1.5 text-xs font-se
 
 export function CustomerDiscoveryPage() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const service = searchParams.get('service') ?? ''
   const serviceCode = searchParams.get('serviceCode') ?? ''
   const city = searchParams.get('city') ?? ''
   const district = searchParams.get('district') ?? ''
@@ -21,6 +22,7 @@ export function CustomerDiscoveryPage() {
   const page = Math.max(1, Number(searchParams.get('page')) || 1)
 
   const { data, error, isError, isPending, isFetching } = useFreelancers({
+    service: service || undefined,
     serviceCode: serviceCode || undefined,
     city: city || undefined,
     district: district || undefined,

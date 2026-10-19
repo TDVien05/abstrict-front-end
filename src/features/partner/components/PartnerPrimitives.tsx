@@ -4,14 +4,14 @@ import { Link } from 'react-router-dom'
 const partnerInputBase = 'w-full min-h-11 rounded-xl border border-brand-border bg-white px-3 py-2 outline-none'
 export const partnerInput = `${partnerInputBase} focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/15`
 export const partnerInputBlue = `${partnerInputBase} focus:border-brand-blue-pastel-hover focus:ring-2 focus:ring-brand-blue-pastel`
-export const partnerLink = 'inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-charcoal px-4 py-2 text-sm font-semibold text-white hover:bg-black'
+export const partnerLink = 'inline-flex min-h-11 items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700'
 
 export function PartnerPage({ title, description, action, accent = 'purple', children }: PropsWithChildren<{ title: string; description: string; action?: ReactNode; accent?: 'purple' | 'blue' }>) {
   return <main className={"w-full px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-10 sm:py-14"}><header className="mb-12 flex flex-wrap items-end justify-between gap-6"><div><p className={`mb-3 text-sm font-semibold ${accent === 'blue' ? 'text-brand-blue-ink' : 'text-brand-purple'}`}>Cổng đối tác ABSTRICT</p><h1 className="page-title">{title}</h1><p className="page-intro mt-6">{description}</p></div>{action}</header>{children}<footer className="mt-14 flex flex-wrap justify-between gap-4 border-t border-brand-border pt-6 text-sm text-brand-muted"><span>ABSTRICT · Cùng chăm sóc tổ ấm</span><Link to="/partners/register">Hồ sơ đối tác</Link><a href="mailto:support@abstrict.vn">Liên hệ hỗ trợ</a></footer></main>
 }
 
 export function PartnerPanel({ title, children, className = '' }: PropsWithChildren<{ title?: string; className?: string }>) {
-  return <section className={`min-w-0 rounded-2xl bg-white p-5 shadow-sm sm:p-7 ${className}`}>{title && <h2 className="mb-6 text-xl font-semibold">{title}</h2>}{children}</section>
+  return <section className={`min-w-0 rounded-2xl bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.08)] sm:p-6 ${className}`}>{title && <h2 className="mb-4 text-base font-semibold">{title}</h2>}{children}</section>
 }
 
 export function PreviewNotice() {

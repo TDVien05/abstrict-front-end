@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { AuthProvider } from '../../features/auth/AuthProvider'
@@ -81,12 +81,11 @@ describe('Partner screens', () => {
     expect(fetchMock.mock.calls.some(([input]) => /\/(confirm|reject)$/.test(String(input)))).toBe(false)
   })
 
-  it('shows the selected plan without claiming a completed payment', () => {
+  it('renders the dashboard overview with stat headings', () => {
     renderPartner(<PartnerDashboardPage />)
-    fireEvent.click(screen.getByRole('button', { name: 'Nâng cấp gói 30 ngày' }))
-    expect(within(screen.getByRole('status')).getByText(/bạn chưa bị tính phí/)).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'Đóng lựa chọn' }))
-    expect(screen.queryByRole('status')).toBeNull()
+    expect(screen.getByRole('heading', { name: 'Tổng quan' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Phân bổ đơn hàng' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: /Xem tất cả/ })).toBeTruthy()
   })
 
   it('loads the KYC dossier and saves the profile as a draft', async () => {

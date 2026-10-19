@@ -7,7 +7,7 @@ import { PartnerLayout } from './layouts/PartnerLayout'
 import { PublicLayout } from './layouts/PublicLayout'
 import { RootLayout } from './layouts/RootLayout'
 import { RouteTransition } from '../shared/ui/RouteTransition'
-import { AdminCompaniesPage, AdminCompanyDetailPage, AdminDisputesPage, AdminKycDetailPage, AdminKycPage } from '../pages/admin/AdminPages'
+import { AdminCompaniesPage, AdminDashboardPage, AdminCompanyDetailPage, AdminDisputesPage, AdminKycDetailPage, AdminKycPage } from '../pages/admin/AdminPages'
 import { BookingCreatePage, CustomerDiscoveryPage, CustomerProviderPage, OrderDetailPage, OrdersPage, ProfilePage } from '../pages/customer/CustomerPages'
 import {
   PartnerAvailabilityPage,
@@ -46,7 +46,6 @@ export const router = createBrowserRouter([
           { index: true, element: <HomePage /> },
           { path: 'partners', element: <DiscoveryPage /> },
           { path: 'partners/register', element: <PartnerTypeChoicePage /> },
-          { path: 'partners/register/kyc', element: <PartnerRegistrationPage /> },
           { path: 'partners/:id', element: <ProviderProfilePage /> },
           { path: 'forbidden', element: <ForbiddenPage /> },
         ],
@@ -96,6 +95,7 @@ export const router = createBrowserRouter([
           { path: 'partner/orders/:id', element: <RequireActor allow={['freelancer']}><PartnerOrderDetailPage /></RequireActor> },
           { path: 'partner/orders', element: <RequireActor allow={['freelancer']}><PartnerOrdersPage /></RequireActor> },
           { path: 'partner/plans', element: <PartnerPlansPage /> },
+          { path: 'partners/register/kyc', element: <RequireActor allow={['freelancer']}><PartnerRegistrationPage /></RequireActor> },
         ],
       },
       {
@@ -106,6 +106,7 @@ export const router = createBrowserRouter([
         ),
         errorElement: <RouteErrorBoundary />,
         children: [
+          { path: 'admin', element: <AdminDashboardPage /> },
           { path: 'admin/approvals', element: <AdminCompaniesPage /> },
           { path: 'admin/companies/:providerId', element: <AdminCompanyDetailPage /> },
           { path: 'admin/kyc', element: <AdminKycPage /> },

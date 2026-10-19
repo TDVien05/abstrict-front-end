@@ -1,4 +1,5 @@
-import { Bell, Search } from 'lucide-react'
+import { Bell } from 'lucide-react'
+import { type ReactNode } from 'react'
 import { NavLink, Link } from 'react-router-dom'
 import type { Actor } from '../../entities/auth'
 import { useAuth } from '../../features/auth/auth-context'
@@ -41,6 +42,29 @@ const navByActor: Record<Actor | 'public', { label: string; to: string }[]> = {
     { label: 'Duyệt doanh nghiệp', to: '/admin/approvals' },
     { label: 'Khiếu nại', to: '/admin/disputes' },
   ],
+}
+
+function CustomerTopbar({ accountMenu }: { accountMenu: ReactNode }) {
+  return (
+    <header className="sticky top-0 z-40 border-b border-brand-border bg-white/95 backdrop-blur-xl">
+      <div className="flex min-h-16 w-full items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
+        <div className="flex min-w-0 items-center gap-5 lg:gap-8">
+          <NavLink aria-label="ABSTRICT - Trang chủ" className="shrink-0" to="/discover"><BrandLogo size="sm" /></NavLink>
+          <nav aria-label="Điều hướng khách hàng" className="hidden items-center gap-1 md:flex">
+            {navByActor.customer.map((item) => (
+              <NavLink className={({ isActive }) => `rounded-lg px-3 py-2 text-sm font-semibold transition ${isActive ? 'bg-slate-100 text-brand-charcoal' : 'text-brand-muted hover:bg-slate-50 hover:text-brand-charcoal'}`} key={item.to} to={item.to}>{item.label}</NavLink>
+            ))}
+            <a className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-muted hover:bg-slate-50 hover:text-brand-charcoal" href="mailto:support@abstrict.vn">Hỗ trợ</a>
+          </nav>
+        </div>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button aria-label="Thông báo" className="relative rounded-lg p-2 text-brand-muted hover:bg-slate-100 hover:text-brand-charcoal" type="button"><Bell aria-hidden="true" className="h-[18px] w-[18px]" /><span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white" /></button>
+          <span className="hidden h-5 w-px bg-brand-border sm:block" />
+          {accountMenu}
+        </div>
+      </div>
+    </header>
+  )
 }
 
 export function AppTopbar({ actor = 'public', registration = false }: AppTopbarProps) {
@@ -97,27 +121,7 @@ export function AppTopbar({ actor = 'public', registration = false }: AppTopbarP
   }
 
   if (actor === 'customer') {
-    return (
-      <header className="sticky top-0 z-40 border-b border-brand-border bg-white/95 backdrop-blur-xl">
-        <div className="flex min-h-16 w-full items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
-          <div className="flex min-w-0 items-center gap-5 lg:gap-8">
-            <NavLink aria-label="ABSTRICT - Trang chủ" className="shrink-0" to="/discover"><BrandLogo size="sm" /></NavLink>
-            <nav aria-label="Điều hướng khách hàng" className="hidden items-center gap-1 md:flex">
-              {navByActor.customer.map((item) => (
-                <NavLink className={({ isActive }) => `rounded-lg px-3 py-2 text-sm font-semibold transition ${isActive ? 'bg-slate-100 text-brand-charcoal' : 'text-brand-muted hover:bg-slate-50 hover:text-brand-charcoal'}`} key={item.to} to={item.to}>{item.label}</NavLink>
-              ))}
-              <a className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-muted hover:bg-slate-50 hover:text-brand-charcoal" href="mailto:support@abstrict.vn">Hỗ trợ</a>
-            </nav>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <label className="relative hidden lg:block"><span className="sr-only">Tìm kiếm</span><Search aria-hidden="true" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" /><input className="h-9 w-60 rounded-xl bg-slate-100 pl-9 pr-3 text-xs outline-none transition focus:bg-white focus:ring-1 focus:ring-brand-charcoal" placeholder="Tìm căn hộ, ca làm việc..." /></label>
-            <button aria-label="Thông báo" className="relative rounded-lg p-2 text-brand-muted hover:bg-slate-100 hover:text-brand-charcoal" type="button"><Bell aria-hidden="true" className="h-[18px] w-[18px]" /><span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500 ring-2 ring-white" /></button>
-            <span className="hidden h-5 w-px bg-brand-border sm:block" />
-            {accountMenu}
-          </div>
-        </div>
-      </header>
-    )
+    return <CustomerTopbar accountMenu={accountMenu} />
   }
 
   return (

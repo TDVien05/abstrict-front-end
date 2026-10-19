@@ -29,11 +29,11 @@ const inputClass = 'mt-2 w-full rounded-xl border border-brand-border bg-white p
 const errorClass = 'rounded-xl bg-red-50 p-3 text-sm text-red-700'
 
 function AdminPage({ action, children, title }: PropsWithChildren<{ action?: ReactNode; title: string }>) {
-  return <main className="w-full px-4 py-10 sm:px-6 lg:px-8 xl:px-10 2xl:px-12"><header className="mb-8 flex flex-wrap items-end justify-between gap-4"><div><p className="mb-2 text-sm font-semibold text-brand-purple">Quản trị ABSTRICT</p><h1 className="text-3xl font-semibold tracking-[-0.03em]">{title}</h1></div>{action}</header>{children}</main>
+  return <div><header className="mb-5 flex flex-wrap items-end justify-between gap-4"><h1 className="text-xl font-semibold tracking-[-0.02em]">{title}</h1>{action}</header>{children}</div>
 }
 
 function Panel({ children, title }: PropsWithChildren<{ title: string }>) {
-  return <section className="rounded-2xl bg-white p-5 shadow-sm sm:p-6"><h2 className="mb-4 text-lg font-semibold">{title}</h2>{children}</section>
+  return <section className="rounded-2xl bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.08)] sm:p-6"><h2 className="mb-4 text-lg font-semibold">{title}</h2>{children}</section>
 }
 
 function Field({ children, label }: PropsWithChildren<{ label: string }>) {
@@ -52,15 +52,15 @@ export function AdminKycPage() {
 
   return (
     <AdminPage title="Duyệt hồ sơ KYC freelancer">
-      <div aria-label="Lọc theo trạng thái" className="mb-6 flex flex-wrap gap-2" role="group">{statusTabs.map((tab) => <button aria-pressed={status === tab.status} className={`min-h-10 rounded-xl px-4 text-sm font-semibold ${status === tab.status ? 'bg-brand-charcoal text-white' : 'bg-white text-brand-muted hover:bg-slate-50'}`} key={tab.label} onClick={() => { setStatus(tab.status); setPage(1) }} type="button">{tab.label}</button>)}</div>
+      <div aria-label="Lọc theo trạng thái" className="mb-6 flex flex-wrap gap-2" role="group">{statusTabs.map((tab) => <button aria-pressed={status === tab.status} className={`min-h-10 rounded-xl px-4 text-sm font-semibold ${status === tab.status ? 'bg-blue-600 text-white' : 'bg-white text-brand-muted hover:bg-slate-50'}`} key={tab.label} onClick={() => { setStatus(tab.status); setPage(1) }} type="button">{tab.label}</button>)}</div>
       {isPending ? <p className="text-brand-muted" role="status">Đang tải danh sách...</p>
         : isError ? <p className={errorClass} role="alert">{kycErrorMessage(error)}</p>
         : data.items.length === 0 ? <p className="rounded-2xl bg-white p-8 text-center text-brand-muted shadow-sm">{status ? 'Không có hồ sơ nào ở trạng thái này.' : 'Hàng chờ đang trống.'}</p>
         : (
-          <div className="overflow-x-auto rounded-2xl bg-white shadow-sm">
+          <div className="overflow-x-auto rounded-2xl bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.08)]">
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead className="border-b border-brand-border text-xs uppercase tracking-wide text-brand-muted"><tr><th className="px-5 py-3 font-semibold">Freelancer</th><th className="px-5 py-3 font-semibold">SĐT tài khoản</th><th className="px-5 py-3 font-semibold">Gửi lúc</th><th className="px-5 py-3 font-semibold">Trạng thái</th></tr></thead>
-              <tbody>{data.items.map((profile) => <tr className="border-b border-brand-border last:border-b-0 hover:bg-slate-50" key={profile.providerId}><td className="px-5 py-3"><Link className="font-semibold text-brand-purple hover:underline" to={`/admin/kyc/${profile.providerId}`}>{profile.legalFullName}</Link></td><td className="px-5 py-3">{profile.phoneNumber}</td><td className="px-5 py-3">{profile.submittedAtUtc ? vnDateTime(profile.submittedAtUtc) : '—'}</td><td className="px-5 py-3"><StatusBadge status={profile.status} /></td></tr>)}</tbody>
+              <tbody>{data.items.map((profile) => <tr className="border-b border-brand-border last:border-b-0 hover:bg-slate-50" key={profile.providerId}><td className="px-5 py-3"><Link className="font-semibold text-blue-600 hover:underline" to={`/admin/kyc/${profile.providerId}`}>{profile.legalFullName}</Link></td><td className="px-5 py-3">{profile.phoneNumber}</td><td className="px-5 py-3">{profile.submittedAtUtc ? vnDateTime(profile.submittedAtUtc) : '—'}</td><td className="px-5 py-3"><StatusBadge status={profile.status} /></td></tr>)}</tbody>
             </table>
           </div>
         )}
