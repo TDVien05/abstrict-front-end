@@ -40,20 +40,19 @@ function sumGroup(counts: Partial<Record<BookingStatus, number>>, statuses: Book
 function Donut({ segments }: { segments: { color: string; value: number }[] }) {
   const total = segments.reduce((s, seg) => s + seg.value, 0)
   if (total === 0) return <div className="flex h-32 w-32 items-center justify-center rounded-full bg-slate-100 text-xs text-brand-muted">Chưa có</div>
-  let offset = 0
   const r = 48; const circ = 2 * Math.PI * r
+  const active = segments.filter((s) => s.value > 0)
+  const offsets = active.reduce<number[]>((acc, seg) => [...acc, (acc.at(-1) ?? 0) + (seg.value / total) * circ], [0])
   return (
     <svg className="h-32 w-32 -rotate-90" viewBox="0 0 120 120">
       <circle cx="60" cy="60" fill="none" r={r} stroke="#f1f5f9" strokeWidth="16" />
-      {segments.filter((s) => s.value > 0).map((seg, i) => {
+      {active.map((seg, i) => {
         const dash = (seg.value / total) * circ
-        const el = (
+        return (
           <circle key={i} cx="60" cy="60" fill="none" r={r}
             stroke={seg.color} strokeDasharray={`${dash} ${circ}`}
-            strokeDashoffset={-offset} strokeWidth="16" strokeLinecap="butt" />
+            strokeDashoffset={-offsets[i]} strokeWidth="16" strokeLinecap="butt" />
         )
-        offset += dash
-        return el
       })}
       <text className="rotate-90" dominantBaseline="middle" fill="#0f172a" fontSize="18" fontWeight="600" textAnchor="middle" transform="rotate(90,60,60)" x="60" y="60">{total}</text>
     </svg>

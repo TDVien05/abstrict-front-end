@@ -153,7 +153,7 @@ export function AdminDashboardPage() {
   const totals = useTotals()
   const kycRecent = useAdminKycList({ page: 1, pageSize: 100 })
   const companyRecent = useAdminCompanies({ page: 1, pageSize: 100 })
-  const days = useMemo(lastDays, [])
+  const days = useMemo(() => lastDays(), [])
   const kycSeries = useMemo(() => bucket(days, (kycRecent.data?.items ?? []).map((item) => item.submittedAtUtc)), [days, kycRecent.data])
   const companySeries = useMemo(() => bucket(days, (companyRecent.data?.items ?? []).map((item) => item.submittedAtUtc)), [days, companyRecent.data])
   const decided = (group: { approved: number; rejected: number }) => group.approved + group.rejected
