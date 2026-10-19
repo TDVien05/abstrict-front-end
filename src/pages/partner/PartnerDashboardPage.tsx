@@ -139,7 +139,7 @@ export function PartnerDashboardPage() {
   const { user } = useAuth()
   const counts = useFreelancerBookingCounts()
   const recent = useFreelancerBookings({ pageSize: 50 })
-  const days = useMemo(lastDays, [])
+  const days = useMemo(() => lastDays(), [])
 
   const c = counts.data?.counts ?? {}
   const total = counts.data?.total ?? 0
