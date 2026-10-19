@@ -53,7 +53,7 @@ export function sessionUserOf(response: LoginResponse): AuthUser {
 }
 
 export function homePathAfterLogin(response: LoginResponse) {
-  if (response.role === 'Admin') return '/admin/approvals'
+  if (response.role === 'Admin') return '/admin'
   // Doanh nghiệp chưa có màn hình nghiệp vụ nào ngoài hồ sơ, kể cả sau khi được duyệt.
   if (response.role === 'Company') return '/partner/company/onboarding'
   if (response.role !== 'Freelancer') return '/discover'

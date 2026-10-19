@@ -74,34 +74,26 @@ export function PartnerRegistrationPage() {
   })
   const { register, handleSubmit, reset, formState: { errors } } = form
 
+  // Theo dõi mục đang hiện trong viewport; chạy lại khi kyc tải xong (sections mới render).
   useEffect(() => {
-    const sections = steps.map((_, index) => document.getElementById(`kyc-${index + 1}`)).filter((section): section is HTMLElement => section !== null)
+    if (!kyc) return
+    const sections = steps.map((_, index) => document.getElementById(`kyc-${index + 1}`)).filter((s): s is HTMLElement => s !== null)
     if (!sections.length) return
 
-    let frame = 0
-    function update() {
-      frame = 0
-      const threshold = window.innerWidth >= 1024 ? 220 : 140
-      let index = 0
-      sections.forEach((section, sectionIndex) => {
-        if (section.getBoundingClientRect().top <= threshold) index = sectionIndex
-      })
-      setSelectedStep((value) => (value === index ? value : index))
-    }
-    function handleScroll() {
-      if (frame) return
-      frame = window.requestAnimationFrame(update)
-    }
+    if (typeof IntersectionObserver === 'undefined') return
+    // rootMargin: cắt 160px trên (dưới sticky header + progress nav) + 45% dưới
+    // → mục được tính "đang xem" khi xuất hiện trong vùng giữa viewport
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting).map((e) => sections.indexOf(e.target as HTMLElement)).filter((i) => i !== -1)
+        if (visible.length > 0) setSelectedStep(Math.min(...visible))
+      },
+      { rootMargin: '-160px 0px -45% 0px', threshold: 0 },
+    )
 
-    update()
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    window.addEventListener('resize', handleScroll)
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-      window.removeEventListener('resize', handleScroll)
-      if (frame) window.cancelAnimationFrame(frame)
-    }
-  }, [])
+    sections.forEach((s) => observer.observe(s))
+    return () => observer.disconnect()
+  }, [kyc])
 
   useEffect(() => {
     if (hydratedRef.current || !kyc) return
@@ -124,7 +116,11 @@ export function PartnerRegistrationPage() {
   const progress = Math.round((stepDone.filter(Boolean).length / steps.length) * 100)
   const activeStep = stepDone.findIndex((done) => !done)
   const currentStep = selectedStep ?? (activeStep === -1 ? steps.length - 1 : activeStep)
-  const barProgress = ((currentStep + 1) / steps.length) * 100
+  // Bar không được lùi sau số bước đã xong thực tế
+  const barProgress = Math.max(
+    ((currentStep + 1) / steps.length) * 100,
+    (stepDone.filter(Boolean).length / steps.length) * 100,
+  )
   const actionError = saveProfile.error ?? submitKyc.error
 
   function handleUpload(type: KycDocumentType, file: File) {
@@ -170,19 +166,15 @@ export function PartnerRegistrationPage() {
 
   return (
     <>
-      <main className="w-full px-6 py-10 sm:px-8 sm:py-14 lg:px-10 2xl:px-12">
-        <header className="mb-12 flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+      <div>
+        <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div className="min-w-0">
-            <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
-              <span className="text-brand-blue-ink">Cổng thẩm định đối tác</span>
-              <span className="text-brand-muted">Trạng thái: {kyc ? kycStatusLabels[kyc.status] : 'Đang tải…'}</span>
-            </div>
-            <h1 className="page-title">Đăng ký & định danh đối tác</h1>
-            <p className="page-intro mt-6">Hoàn thiện hồ sơ định danh để nhận ca giúp việc căn hộ ABSTRICT. Khai thông tin cá nhân, tải ảnh CCCD và ảnh chân dung để gửi thẩm định.</p>
+            <h1 className="text-xl font-semibold tracking-[-0.02em]">Đăng ký & định danh đối tác</h1>
+            <p className="mt-1 text-sm text-brand-muted">Trạng thái: {kyc ? kycStatusLabels[kyc.status] : 'Đang tải…'} · Hoàn thiện hồ sơ để nhận ca giúp việc căn hộ ABSTRICT.</p>
           </div>
-          <div className="flex shrink-0 items-center gap-3 self-start rounded-xl bg-white p-4 lg:self-end">
-            <ShieldCheck aria-hidden className="h-9 w-9 text-brand-blue-ink" />
-            <div><p className="text-sm text-brand-muted">Quy trình thẩm định</p><p className="font-semibold">Định danh & an toàn</p></div>
+          <div className="flex shrink-0 items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm">
+            <ShieldCheck aria-hidden className="h-6 w-6 text-blue-600" />
+            <p className="text-sm font-semibold">Định danh & an toàn</p>
           </div>
         </header>
 
@@ -191,18 +183,20 @@ export function PartnerRegistrationPage() {
           : (
             <>
               <StatusBanner kyc={kyc} />
-              <nav aria-label="Các phần hồ sơ" className="mb-8 rounded-2xl bg-white p-4 sm:p-6 lg:sticky lg:top-16 lg:z-30 lg:shadow-md">
+              <nav aria-label="Các phần hồ sơ" className="mb-8 rounded-2xl bg-white p-4 shadow-sm sm:p-5 lg:sticky lg:top-16 lg:z-20 lg:shadow-md">
                 <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {steps.map(([title, caption], index) => (
                     <li key={title}>
-                      <a href={`#kyc-${index + 1}`} aria-current={currentStep === index ? 'step' : undefined} onClick={() => setSelectedStep(index)} className={`flex h-full items-center gap-3 rounded-xl p-2 ${kycFocus} ${index <= currentStep || stepDone[index] ? 'bg-brand-blue-pastel-soft' : ''}`}>
-                        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-semibold ${index <= currentStep || stepDone[index] ? 'bg-brand-blue-pastel text-brand-charcoal' : 'bg-brand-sand'}`}>{index + 1}</span>
+                      <a href={`#kyc-${index + 1}`} aria-current={currentStep === index ? 'step' : undefined} onClick={() => setSelectedStep(index)} className={`flex h-full items-center gap-3 rounded-xl p-2 ${kycFocus} ${index <= currentStep || stepDone[index] ? 'bg-blue-50' : ''}`}>
+                        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-semibold ${stepDone[index] ? 'bg-emerald-500 text-white' : index <= currentStep ? 'bg-blue-600 text-white' : 'bg-slate-100 text-brand-muted'}`}>
+                          {stepDone[index] ? <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg> : index + 1}
+                        </span>
                         <span className="min-w-0"><span className="mb-1 block text-sm text-brand-muted">Bước {index + 1} · {stepDone[index] ? 'Đã xong' : caption}</span><span className="block text-sm font-semibold">{title}</span></span>
                       </a>
                     </li>
                   ))}
                 </ol>
-                <progress aria-label="Tiến độ điền hồ sơ" value={barProgress} max={100} className="mt-5 block h-1.5 w-full appearance-none overflow-hidden rounded-full bg-brand-sand accent-brand-blue-pastel [&::-webkit-progress-bar]:bg-brand-sand [&::-webkit-progress-value]:bg-brand-blue-pastel [&::-moz-progress-bar]:bg-brand-blue-pastel" />
+                <div aria-label="Tiến độ điền hồ sơ" aria-valuemax={100} aria-valuemin={0} aria-valuenow={Math.round(barProgress)} className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-slate-100" role="progressbar"><div className="h-full rounded-full bg-blue-600 transition-[width] duration-300" style={{ width: `${barProgress}%` }} /></div>
               </nav>
 
               <FormProvider {...form}>
@@ -266,13 +260,7 @@ export function PartnerRegistrationPage() {
               </FormProvider>
             </>
           )}
-      </main>
-      <footer className="mt-10 border-t border-brand-border bg-white">
-        <div className="flex w-full flex-col justify-between gap-5 px-6 py-8 text-sm text-brand-muted sm:px-8 lg:flex-row lg:px-10 2xl:px-12">
-          <p>© {new Date().getFullYear()} ABSTRICT. Dịch vụ chăm sóc & giúp việc căn hộ.</p>
-          <div className="flex flex-wrap items-center gap-5"><a href="mailto:support@abstrict.vn">Trung tâm trợ giúp</a><Link to="/partners/register">Gia nhập đối tác</Link><span className="text-brand-charcoal">Cổng đối tác ABSTRICT</span></div>
-        </div>
-      </footer>
+      </div>
     </>
   )
 }

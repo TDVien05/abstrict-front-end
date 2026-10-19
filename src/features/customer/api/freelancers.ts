@@ -53,6 +53,7 @@ export interface FreelancerDetail {
 }
 
 export interface FreelancerFilters {
+  service?: string
   serviceCode?: string
   city?: string
   district?: string
@@ -108,5 +109,24 @@ export function useFreelancer(providerId: string | undefined) {
     queryFn: () => getFreelancer(providerId as string),
     enabled: Boolean(providerId),
     retry: false,
+  })
+}
+
+export interface FreelancerRating {
+  id: string
+  bookingId: string
+  bookingNumber: string
+  score: number
+  comment: string | null
+  publishedAtUtc: string
+}
+
+export function useFreelancerRatings(providerId: string | undefined, pageSize = 10) {
+  return useQuery({
+    queryKey: ['freelancer', providerId, 'ratings'],
+    queryFn: () => apiRequest<{ items: FreelancerRating[]; page: number; totalItems: number; totalPages: number }>(
+      `/freelancers/${encodeURIComponent(providerId as string)}/ratings?page=1&pageSize=${pageSize}`,
+    ),
+    enabled: Boolean(providerId),
   })
 }

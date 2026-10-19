@@ -23,6 +23,7 @@ import { BrandLogo } from '../../../shared/ui/BrandLogo'
 import { Reveal } from '../../../shared/ui/Reveal'
 import { Spotlight } from '../../../shared/ui/Spotlight'
 import { useParallax } from '../../../shared/ui/useParallax'
+import { serviceLabels } from '../../customer/api/freelancers'
 import {
   bookingModes,
   bookingSteps,
@@ -121,14 +122,12 @@ export function HeroSection() {
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
-    const params = new URLSearchParams({
-      location: String(data.get('location') ?? ''),
-      date: String(data.get('date') ?? ''),
-      service: String(data.get('service') ?? ''),
-      page: '1',
-      pageSize: '12',
-    })
-    navigate(`/partners?${params.toString()}`)
+    const params = new URLSearchParams({ page: '1', pageSize: '12' })
+    const city = String(data.get('city') ?? '').trim()
+    const serviceCode = String(data.get('serviceCode') ?? '').trim()
+    if (city) params.set('city', city)
+    if (serviceCode) params.set('serviceCode', serviceCode)
+    navigate(`/discover?${params.toString()}`)
   }
 
   return (
@@ -149,32 +148,31 @@ export function HeroSection() {
           <div className={`hero-enter mb-6 min-w-0 w-full rounded-2xl border border-brand-border bg-white p-4 sm:p-5 ${softShadow}`} id="hero-search" style={enter(340)}>
             <form className="grid min-w-0 grid-cols-1 gap-3.5 sm:grid-cols-3" onSubmit={handleSearch}>
               <SearchSelect
-                defaultValue="quan-1"
+                defaultValue=""
                 label="Khu vực"
-                name="location"
+                name="city"
                 options={[
-                  { label: 'Quận 1, TP.HCM', value: 'quan-1' },
-                  { label: 'Bình Thạnh', value: 'binh-thanh' },
-                  { label: 'Vinhomes Central Park', value: 'vinhomes-central-park' },
-                  { label: 'Quận 2, TP. Thủ Đức', value: 'quan-2' },
-                  { label: 'Quận 7, Phú Mỹ Hưng', value: 'quan-7' },
+                  { label: 'Tất cả khu vực', value: '' },
+                  { label: 'Hồ Chí Minh', value: 'Hồ Chí Minh' },
+                  { label: 'Hà Nội', value: 'Hà Nội' },
+                  { label: 'Đà Nẵng', value: 'Đà Nẵng' },
+                  { label: 'Cần Thơ', value: 'Cần Thơ' },
+                  { label: 'Bình Dương', value: 'Bình Dương' },
+                ]}
+              />
+              <SearchSelect
+                defaultValue=""
+                label="Loại dịch vụ"
+                name="serviceCode"
+                options={[
+                  { label: 'Tất cả dịch vụ', value: '' },
+                  ...Object.entries(serviceLabels).map(([value, label]) => ({ label, value })),
                 ]}
               />
               <label className="flex min-w-0 flex-col text-left text-sm font-semibold text-brand-charcoal">
                 <span className="mb-2">Ngày cần làm</span>
-                <input className="w-full min-w-0 rounded-xl border border-brand-border bg-brand-sand/50 px-3 py-2.5 text-sm font-normal normal-case tracking-normal text-brand-charcoal focus:border-brand-blue-pastel-hover focus:outline-none focus:ring-1 focus:ring-brand-blue-pastel" defaultValue="2026-10-28" name="date" type="date" />
+                <input className="w-full min-w-0 rounded-xl border border-brand-border bg-brand-sand/50 px-3 py-2.5 text-sm font-normal normal-case tracking-normal text-brand-charcoal focus:border-brand-blue-pastel-hover focus:outline-none focus:ring-1 focus:ring-brand-blue-pastel" name="date" type="date" />
               </label>
-              <SearchSelect
-                defaultValue="don-dep-tieu-chuan"
-                label="Loại dịch vụ"
-                name="service"
-                options={[
-                  { label: 'Dọn dẹp tiêu chuẩn', value: 'don-dep-tieu-chuan' },
-                  { label: 'Vệ sinh bếp & toilet', value: 've-sinh-bep-toilet' },
-                  { label: 'Giặt ủi & sắp xếp', value: 'giat-ui-sap-xep' },
-                  { label: 'Dọn dẹp định kỳ', value: 'don-dep-dinh-ky' },
-                ]}
-              />
               <div className="flex flex-wrap items-center justify-between gap-4 pt-2 sm:col-span-3">
                 <a className="text-sm font-medium text-brand-muted transition-colors hover:text-brand-charcoal" href="#how-it-works">Xem cách hoạt động →</a>
                 <button className="press btn-sheen inline-flex w-full items-center justify-center rounded-xl bg-brand-blue-pastel px-7 py-3 text-sm font-semibold text-brand-charcoal shadow-sm transition-colors hover:bg-brand-blue-pastel-hover sm:w-auto" type="submit">Tìm đối tác</button>
