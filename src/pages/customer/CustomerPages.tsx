@@ -10,6 +10,7 @@ import { vnDateLabel, vnTimeRange } from '../../shared/lib/vn-time'
 export { BookingCreatePage } from './BookingCreatePage'
 export { CustomerDiscoveryPage } from './CustomerDiscoveryPage'
 export { CustomerProviderPage } from './CustomerProviderPage'
+export { DisputeCreatePage, DisputeDetailPage, DisputesPage } from './DisputePages'
 export { OrderDetailPage } from './OrderDetailPage'
 export { ProfilePage } from './ProfilePage'
 

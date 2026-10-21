@@ -31,6 +31,32 @@ export interface BookingTimelineEntry {
   atUtc: string
 }
 
+export type BookingPhotoType = 'Before' | 'After' | 'Evidence'
+
+export interface BookingPhoto {
+  id: string
+  type: BookingPhotoType
+  bookingTaskId: string | null
+  caption: string | null
+  takenAtUtc: string
+  uploadedByUserId: string
+  /** Đường dẫn tuyệt đối trên server (đã gồm /api/v1), cần access token nên tải bằng ProtectedImage. */
+  contentUrl: string
+}
+
+export const bookingPhotoTypeLabels: Record<BookingPhotoType, string> = {
+  Before: 'Trước khi làm',
+  After: 'Sau khi làm',
+  Evidence: 'Bằng chứng',
+}
+
+export const bookingTaskStatusLabels: Record<BookingTask['status'], string> = {
+  Pending: 'Chưa làm',
+  InProgress: 'Đang làm',
+  Completed: 'Đã xong',
+  ClarificationRequested: 'Cần làm rõ',
+}
+
 export interface PagedResponse<T> {
   items: T[]
   page: number
@@ -77,6 +103,11 @@ const timelineReasonLabels: Record<string, string> = {
   CustomerCancelled: 'Khách hủy đơn',
   HoldExpired: 'Hết thời gian giữ chỗ',
   ConfirmationExpired: 'Đối tác không phản hồi kịp hạn',
+  CheckedIn: 'Đối tác đã check-in',
+  WorkStarted: 'Đối tác bắt đầu thực hiện ca',
+  WorkFinished: 'Đối tác hoàn tất ca, chờ nghiệm thu',
+  CustomerAcceptedWork: 'Khách đã nghiệm thu',
+  CustomerDisputeOpened: 'Khách mở khiếu nại',
 }
 
 export function timelineLabel(entry: BookingTimelineEntry) {
@@ -117,6 +148,27 @@ const bookingErrorMessages: Record<string, string> = {
   PROVIDER_NOT_APPROVED: 'Hồ sơ của bạn chưa được duyệt nên chưa thể mở lịch rảnh.',
   AVAILABILITY_OVERLAP: 'Khoảng rảnh này chồng lên một khoảng rảnh khác.',
   AVAILABILITY_IN_USE: 'Không thể xóa vì đang có đơn chiếm chỗ trong khoảng rảnh này.',
+  IDEMPOTENCY_KEY_REQUIRED: 'Thiếu mã chống trùng yêu cầu. Vui lòng tải lại trang và thử lại.',
+  CHECK_IN_TOKEN_INVALID: 'Mã QR không hợp lệ. Hãy nhờ khách hiển thị lại mã.',
+  CHECK_IN_TOKEN_EXPIRED: 'Mã QR đã hết hạn hoặc đã bị thay bằng mã mới. Hãy nhờ khách làm mới mã.',
+  AFTER_PHOTO_REQUIRED: 'Cần tải ít nhất một ảnh "Sau khi làm" trước khi hoàn tất ca.',
+  EMPTY_FILE: 'Tệp ảnh đang trống. Vui lòng chọn ảnh khác.',
+  FILE_TOO_LARGE: 'Ảnh lớn hơn 5 MB. Vui lòng chọn ảnh nhỏ hơn.',
+  UNSUPPORTED_IMAGE: 'Chỉ nhận ảnh JPG hoặc PNG.',
+  INVALID_BOOKING_TASK: 'Mục công việc không thuộc đơn này.',
+  BOOKING_TASK_NOT_FOUND: 'Không tìm thấy mục công việc.',
+  BOOKING_PHOTO_NOT_FOUND: 'Không tìm thấy ảnh.',
+  BOOKING_NOT_COMPLETED: 'Chỉ đánh giá được sau khi đơn hoàn thành.',
+  BOOKING_ALREADY_RATED: 'Bạn đã đánh giá đơn này rồi.',
+  RATING_NOT_FOUND: 'Bạn chưa đánh giá đơn này.',
+  BOOKING_NOT_DISPUTABLE: 'Chỉ khiếu nại được đơn đã hoàn tất hoặc đang chờ nghiệm thu, và mỗi đơn chỉ khiếu nại một lần.',
+  DISPUTE_ALREADY_OPEN: 'Đơn này đã có khiếu nại đang được xử lý.',
+  DISPUTE_NOT_FOUND: 'Không tìm thấy khiếu nại này.',
+  DISPUTE_ALREADY_DECIDED: 'Khiếu nại này đã có quyết định.',
+  DISPUTE_CLOSED: 'Khiếu nại đã kết thúc nên không thể bổ sung bằng chứng.',
+  EVIDENCE_LIMIT_REACHED: 'Mỗi bên chỉ gửi được tối đa 10 ảnh bằng chứng.',
+  INVALID_DISPUTE_CATEGORY: 'Loại khiếu nại không hợp lệ.',
+  INVALID_DISPUTE_AMOUNT: 'Tổng tiền hoàn cho khách và tiền trả người làm vượt quá giá trị đơn.',
 }
 
 export function bookingErrorMessage(error: unknown) {
@@ -124,6 +176,7 @@ export function bookingErrorMessage(error: unknown) {
     const code = error.problem.code
     if (code && code in bookingErrorMessages) return bookingErrorMessages[code]
     if (error.status === 429) return 'Bạn thao tác quá nhanh. Vui lòng thử lại sau ít phút.'
+    if (error.status === 413) return bookingErrorMessages.FILE_TOO_LARGE
     const validationMessage = Object.values(error.problem.errors ?? {}).flat()[0]
     return validationMessage ?? error.message
   }

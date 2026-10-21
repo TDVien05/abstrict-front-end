@@ -23,6 +23,7 @@ const navByActor: Record<Actor | 'public', { label: string; to: string }[]> = {
   customer: [
     { label: 'Khám phá dịch vụ', to: '/discover' },
     { label: 'Đơn của tôi', to: '/orders' },
+    { label: 'Khiếu nại', to: '/disputes' },
     { label: 'Cổng đối tác', to: '/partners/register' },
   ],
   freelancer: [

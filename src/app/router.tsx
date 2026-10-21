@@ -7,8 +7,8 @@ import { PartnerLayout } from './layouts/PartnerLayout'
 import { PublicLayout } from './layouts/PublicLayout'
 import { RootLayout } from './layouts/RootLayout'
 import { RouteTransition } from '../shared/ui/RouteTransition'
-import { AdminCompaniesPage, AdminDashboardPage, AdminCompanyDetailPage, AdminDisputesPage, AdminKycDetailPage, AdminKycPage } from '../pages/admin/AdminPages'
-import { BookingCreatePage, CustomerDiscoveryPage, CustomerProviderPage, OrderDetailPage, OrdersPage, ProfilePage } from '../pages/customer/CustomerPages'
+import { AdminCompaniesPage, AdminDashboardPage, AdminCompanyDetailPage, AdminDisputeDetailPage, AdminDisputesPage, AdminKycDetailPage, AdminKycPage } from '../pages/admin/AdminPages'
+import { BookingCreatePage, CustomerDiscoveryPage, CustomerProviderPage, DisputeCreatePage, DisputeDetailPage, DisputesPage, OrderDetailPage, OrdersPage, ProfilePage } from '../pages/customer/CustomerPages'
 import {
   PartnerAvailabilityPage,
   PartnerDashboardPage,
@@ -63,6 +63,9 @@ export const router = createBrowserRouter([
           { path: 'book/:providerId', element: <BookingCreatePage /> },
           { path: 'orders', element: <OrdersPage /> },
           { path: 'orders/:id', element: <OrderDetailPage /> },
+          { path: 'orders/:id/dispute', element: <DisputeCreatePage /> },
+          { path: 'disputes', element: <DisputesPage /> },
+          { path: 'disputes/:disputeId', element: <DisputeDetailPage /> },
           { path: 'profile', element: <ProfilePage /> },
         ],
       },
@@ -112,6 +115,7 @@ export const router = createBrowserRouter([
           { path: 'admin/kyc', element: <AdminKycPage /> },
           { path: 'admin/kyc/:providerId', element: <AdminKycDetailPage /> },
           { path: 'admin/disputes', element: <AdminDisputesPage /> },
+          { path: 'admin/disputes/:disputeId', element: <AdminDisputeDetailPage /> },
         ],
       },
       {

@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { BookingStatus, BookingTask, BookingTimelineEntry, PagedResponse } from '../../../entities/booking'
+import type { BookingPhoto, BookingPhotoType, BookingStatus, BookingTask, BookingTimelineEntry, PagedResponse } from '../../../entities/booking'
 import { apiRequest } from '../../../shared/api/http-client'
 
 export interface AvailabilityWindow {
@@ -8,7 +8,11 @@ export interface AvailabilityWindow {
   endsAtUtc: string
 }
 
-export type FreelancerBookingAction = 'Confirm' | 'Reject'
+export type FreelancerBookingAction = 'Confirm' | 'Reject' | 'CheckIn' | 'UploadPhotos' | 'CompleteWork'
+
+export const checkInTokenLength = { min: 8, max: 128 }
+export const photoCaptionMaxLength = 300
+export const taskStatusOptions: BookingTask['status'][] = ['Pending', 'InProgress', 'Completed']
 
 export interface FreelancerBookingSummary {
   id: string
@@ -31,6 +35,8 @@ export interface FreelancerBookingDetail extends FreelancerBookingSummary {
   customerNote: string | null
   tasks: BookingTask[]
   timeline: BookingTimelineEntry[]
+  /** Ảnh tiến độ Before/After đã tải lên. */
+  photos: BookingPhoto[]
 }
 
 export interface FreelancerBookingCounts {
@@ -96,6 +102,50 @@ export function useFreelancerBooking(bookingId: string | undefined) {
     enabled: Boolean(bookingId),
     retry: false,
   })
+}
+
+// Mọi thao tác thực hiện ca trả về chi tiết đơn mới nên cập nhật thẳng cache, rồi tải lại danh sách và bộ đếm.
+function useFieldWorkMutation<TInput>(bookingId: string, send: (input: TInput) => Promise<FreelancerBookingDetail>) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: send,
+    onSuccess: (booking) => {
+      queryClient.setQueryData([...bookingsKey, 'detail', bookingId], booking)
+      void queryClient.invalidateQueries({ queryKey: [...bookingsKey, 'list'] })
+      void queryClient.invalidateQueries({ queryKey: [...bookingsKey, 'counts'] })
+    },
+  })
+}
+
+export function useCheckIn(bookingId: string) {
+  return useFieldWorkMutation(bookingId, (token: string) => apiRequest<FreelancerBookingDetail>(`${bookingPath(bookingId)}/check-in`, { method: 'POST', body: { token } }))
+}
+
+export function useUpdateTaskStatus(bookingId: string) {
+  return useFieldWorkMutation(bookingId, ({ status, taskId }: { status: BookingTask['status']; taskId: string }) =>
+    apiRequest<FreelancerBookingDetail>(`${bookingPath(bookingId)}/tasks/${encodeURIComponent(taskId)}`, { method: 'PATCH', body: { status } }))
+}
+
+export interface UploadPhotoInput {
+  file: File
+  type: Extract<BookingPhotoType, 'Before' | 'After'>
+  bookingTaskId?: string
+  caption?: string
+}
+
+export function useUploadProgressPhoto(bookingId: string) {
+  return useFieldWorkMutation(bookingId, ({ bookingTaskId, caption, file, type }: UploadPhotoInput) => {
+    const body = new FormData()
+    body.append('file', file)
+    body.append('type', type)
+    if (bookingTaskId) body.append('bookingTaskId', bookingTaskId)
+    if (caption?.trim()) body.append('caption', caption.trim())
+    return apiRequest<FreelancerBookingDetail>(`${bookingPath(bookingId)}/photos`, { method: 'POST', body })
+  })
+}
+
+export function useCompleteWork(bookingId: string) {
+  return useFieldWorkMutation(bookingId, () => apiRequest<FreelancerBookingDetail>(`${bookingPath(bookingId)}/complete`, { method: 'POST' }))
 }
 
 export function useRespondToBooking(bookingId: string) {

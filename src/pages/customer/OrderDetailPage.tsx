@@ -6,6 +6,7 @@ import { Link, useParams } from 'react-router-dom'
 import { bookingErrorMessage, bookingStatusLabels, bookingStatusTones, timelineLabel } from '../../entities/booking'
 import { paymentMethods, requestCheckInToken, useBooking, useCancelBooking, useCancellationPreview, useConfirmSandboxPayment, useInitiateDeposit, type BookingDetail, type PaymentMethod } from '../../features/customer/api/bookings'
 import { CustomerCard, CustomerContainer, StatusPill } from '../../features/customer/components/CustomerPrimitives'
+import { AcceptWorkPanel, DisputePanel, ProgressPhotos, RatingPanel } from '../../features/customer/components/OrderActions'
 import { formatVnd } from '../../shared/lib/format-currency'
 import { durationHours, vnDateLabel, vnDateTime, vnTimeRange } from '../../shared/lib/vn-time'
 import { Select } from '../../shared/ui/Select'
@@ -138,6 +139,8 @@ export function OrderDetailPage() {
 
                 {booking.tasks.length > 0 ? <CustomerCard className="p-5 sm:p-6"><h2 className="text-lg font-semibold">Công việc trong ca</h2><ul className="mt-4 grid gap-2 sm:grid-cols-2">{[...booking.tasks].sort((a, b) => a.sortOrder - b.sortOrder).map((task) => <li className="flex gap-2 text-sm" key={task.id}><CheckCircle2 aria-hidden="true" className={`mt-0.5 h-4 w-4 shrink-0 ${task.status === 'Completed' ? 'text-emerald-600' : 'text-slate-300'}`} /><span><span className="text-brand-muted">{task.areaName}: </span>{task.description}</span></li>)}</ul></CustomerCard> : null}
 
+                <ProgressPhotos booking={booking} />
+
                 <CustomerCard className="p-5 sm:p-6"><h2 className="text-lg font-semibold">Lịch sử đơn</h2><ol className="mt-4 space-y-3">{booking.timeline.map((entry) => <li className="flex justify-between gap-4 text-sm" key={`${entry.atUtc}-${entry.toStatus}`}><span><span className="font-semibold">{timelineLabel(entry)}</span>{entry.note ? <span className="block text-brand-muted">“{entry.note}”</span> : null}</span><time className="shrink-0 text-brand-muted" dateTime={entry.atUtc}>{vnDateTime(entry.atUtc)}</time></li>)}</ol></CustomerCard>
               </div>
 
@@ -154,6 +157,9 @@ export function OrderDetailPage() {
                 </CustomerCard>
                 {booking.allowedActions.includes('PayDeposit') ? <DepositPanel booking={booking} /> : null}
                 {booking.allowedActions.includes('ShowCheckInQr') ? <CheckInPanel bookingId={booking.id} /> : null}
+                {booking.allowedActions.includes('AcceptWork') ? <AcceptWorkPanel booking={booking} /> : null}
+                <RatingPanel booking={booking} />
+                <DisputePanel booking={booking} />
                 {booking.allowedActions.includes('Cancel') ? <CancelPanel booking={booking} /> : null}
               </aside>
             </div>
