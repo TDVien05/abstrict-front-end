@@ -20,7 +20,7 @@ export function BookingResponseActions({ allowedActions, bookingId, summary }: {
     respond.mutate(action === 'accept' ? { accept: true } : { accept: false, reason })
   }
 
-  if (allowedActions.length === 0) return null
+  if (!allowedActions.includes('Confirm') && !allowedActions.includes('Reject')) return null
 
   return (
     <div>

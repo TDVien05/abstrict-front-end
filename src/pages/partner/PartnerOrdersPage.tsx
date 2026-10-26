@@ -25,7 +25,7 @@ function OrderCard({ order }: { order: FreelancerBookingSummary }) {
     <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
       <div className="grid gap-4 sm:grid-cols-2"><div className="rounded-xl bg-brand-sand p-4"><CalendarDays aria-hidden="true" className="mb-2 h-5 w-5 text-brand-purple" /><p className="text-sm text-brand-muted">Thời gian làm việc</p><p className="mt-1 font-semibold first-letter:uppercase">{vnDateLabel(order.startsAtUtc)}</p><p className="text-sm text-brand-purple">{time}</p></div><div className="rounded-xl bg-brand-sand p-4"><MapPin aria-hidden="true" className="mb-2 h-5 w-5 text-brand-purple" /><p className="text-sm text-brand-muted">Khu vực</p><p className="mt-1 font-semibold">{order.areaLabel}</p><p className="text-sm text-brand-muted">Địa chỉ đầy đủ hiển thị sau khi đơn được xác nhận.</p></div></div>
       <div className="rounded-xl bg-brand-sand p-5"><dl className="space-y-4 text-sm"><div className="flex justify-between gap-3"><dt>Giá trị ca</dt><dd className="font-semibold">{formatVnd(order.baseAmountVnd)}</dd></div><div className="flex justify-between gap-3"><dt>Khách đã ký quỹ</dt><dd className="text-brand-purple">{formatVnd(order.depositAmountVnd)}</dd></div></dl>
-        {order.allowedActions.length > 0 && <>
+        {order.allowedActions.some((action) => action === 'Confirm' || action === 'Reject') && <>
           {order.providerConfirmationDeadlineUtc && <p className="mt-4 text-sm text-brand-muted">Hạn phản hồi: {vnDateTime(order.providerConfirmationDeadlineUtc)}</p>}
           <div className="mt-5"><BookingResponseActions allowedActions={order.allowedActions} bookingId={order.id} summary={`${time} tại ${order.areaLabel}`} /></div>
         </>}

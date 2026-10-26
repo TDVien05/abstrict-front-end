@@ -1,4 +1,6 @@
 export { PartnerAvailabilityPage } from './PartnerAvailabilityPage'
-export { PartnerDashboardPage, PartnerPlansPage } from './PartnerDashboardPage'
+export { PartnerDashboardPage } from './PartnerDashboardPage'
+export { PartnerPlansPage } from './PartnerPlansPage'
+export { PartnerProfilePage } from './PartnerProfilePage'
 export { PartnerOrderDetailPage } from './PartnerOrderDetailPage'
 export { PartnerOrdersPage } from './PartnerOrdersPage'

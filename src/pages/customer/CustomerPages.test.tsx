@@ -20,7 +20,7 @@ const booking = {
   id: 'b1', bookingNumber: 'AB261012HXQDC2', status: 'PendingDeposit', providerId, providerDisplayName: 'Nguyễn Thị Lan', serviceCategoryCode: 'CLEANING', serviceCategoryName: 'Dọn dẹp nhà cửa',
   startsAtUtc: '2099-01-01T01:00:00+00:00', endsAtUtc: '2099-01-01T03:00:00+00:00', baseAmountVnd: 160000, depositAmountVnd: 24000, holdExpiresAtUtc: '2099-01-01T00:00:00+00:00',
   addressSnapshot: 'A-1205, Vinhomes, 12 Lê Lợi, Bến Nghé, Quận 1, Hồ Chí Minh', customerNote: null, unitPriceVnd: 80000, surchargeAmountVnd: 0, extensionAmountVnd: 0, remainingAmountVnd: 136000,
-  providerConfirmationDeadlineUtc: null, cancelledAtUtc: null, cancellationReason: null, depositPayment: null as unknown, tasks: [], timeline: [], allowedActions: ['PayDeposit', 'Cancel'], serverTimeUtc: '2098-12-31T23:50:00+00:00',
+  providerConfirmationDeadlineUtc: null, cancelledAtUtc: null, cancellationReason: null, depositPayment: null as unknown, tasks: [], timeline: [], allowedActions: ['PayDeposit', 'Cancel'], serverTimeUtc: '2098-12-31T23:50:00+00:00', photos: [] as unknown[],
 }
 
 function jsonResponse(body: unknown, status = 200) {

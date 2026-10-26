@@ -12,6 +12,6 @@ The F2-F3 source screen's internal title says B1-B2; the project canvas label id
 
 Use `VITE_DEMO_PARTNER=true` in a local development environment to preview protected freelancer routes. This flag is ignored in production and takes precedence over the customer preview flag. Route guards remain in place.
 
-Dashboard and booking data live in `partner-preview.ts` and are explicitly marked as illustrative. Plan selection and booking confirmation/rejection do not charge, send requests, or mutate bookings. KYC validates fields and file types/sizes, previews images with temporary object URLs, and keeps data only in the mounted page; it does not upload documents, persist sensitive data, perform OCR/biometrics or claim approval.
+The plans page (`/partner/plans`) lists plans configured by admins via `GET /partner/promotion-plans`; admins configure them, and partners buy them there (sandbox payment only, via `/partner/promotion-purchases`). KYC validates fields and file types/sizes, previews images with temporary object URLs, and keeps data only in the mounted page; it does not upload documents, persist sensitive data, perform OCR/biometrics or claim approval.
 
 Backend integration still requires agreed contracts for partner registration/uploads/KYC, metrics, plans and checkout, booking queries and accept/reject mutations. Replace fixtures with server data and handle conflicts/deadlines on the server before enabling transactions. Availability and the existing booking detail placeholder are outside F1–F4.

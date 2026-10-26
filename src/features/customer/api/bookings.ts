@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { clockOffsetOf, type BookingStatus, type BookingTask, type BookingTimelineEntry, type PagedResponse, type PaymentStatus } from '../../../entities/booking'
+import { clockOffsetOf, type BookingPhoto, type BookingStatus, type BookingTask, type BookingTimelineEntry, type PagedResponse, type PaymentStatus } from '../../../entities/booking'
 import { apiRequest } from '../../../shared/api/http-client'
 
 export interface TimeRange {
@@ -67,7 +67,7 @@ export interface BookingSummary {
   holdExpiresAtUtc: string | null
 }
 
-export type BookingAction = 'PayDeposit' | 'Cancel' | 'ShowCheckInQr'
+export type BookingAction = 'PayDeposit' | 'Cancel' | 'ShowCheckInQr' | 'OpenDispute' | 'AcceptWork' | 'RateProvider'
 
 export const paymentMethods = { Momo: 'Ví MoMo', VietQr: 'VietQR', ZaloPay: 'ZaloPay', Card: 'Thẻ ngân hàng', BankTransfer: 'Chuyển khoản' } as const
 export type PaymentMethod = keyof typeof paymentMethods
@@ -97,6 +97,8 @@ interface BookingDetailResponse extends BookingSummary {
   timeline: BookingTimelineEntry[]
   allowedActions: BookingAction[]
   serverTimeUtc: string
+  /** Ảnh tiến độ Before/After do freelancer tải lên. */
+  photos: BookingPhoto[]
 }
 
 export interface BookingDetail extends BookingDetailResponse {
@@ -239,6 +241,17 @@ export function useCancelBooking(bookingId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (reason: string) => requestBookingDetail(`${bookingPath(bookingId)}/cancel`, { method: 'POST', body: reason ? { reason } : {} }),
+    onSuccess: (booking) => {
+      queryClient.setQueryData(detailKey(bookingId), booking)
+      void queryClient.invalidateQueries({ queryKey: ['bookings', 'list'] })
+    },
+  })
+}
+
+export function useAcceptWork(bookingId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => requestBookingDetail(`${bookingPath(bookingId)}/accept-work`, { method: 'POST' }),
     onSuccess: (booking) => {
       queryClient.setQueryData(detailKey(bookingId), booking)
       void queryClient.invalidateQueries({ queryKey: ['bookings', 'list'] })

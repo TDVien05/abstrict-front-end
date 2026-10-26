@@ -7,13 +7,14 @@ import { PartnerLayout } from './layouts/PartnerLayout'
 import { PublicLayout } from './layouts/PublicLayout'
 import { RootLayout } from './layouts/RootLayout'
 import { RouteTransition } from '../shared/ui/RouteTransition'
-import { AdminCompaniesPage, AdminDashboardPage, AdminCompanyDetailPage, AdminDisputesPage, AdminKycDetailPage, AdminKycPage } from '../pages/admin/AdminPages'
-import { BookingCreatePage, CustomerDiscoveryPage, CustomerProviderPage, OrderDetailPage, OrdersPage, ProfilePage } from '../pages/customer/CustomerPages'
+import { AdminCompaniesPage, AdminDashboardPage, AdminCompanyDetailPage, AdminDisputeDetailPage, AdminDisputesPage, AdminKycDetailPage, AdminKycPage, AdminPlansPage } from '../pages/admin/AdminPages'
+import { BookingCreatePage, CustomerDiscoveryPage, CustomerProviderPage, DisputeCreatePage, DisputeDetailPage, DisputesPage, OrderDetailPage, OrdersPage, ProfilePage } from '../pages/customer/CustomerPages'
 import {
   PartnerAvailabilityPage,
   PartnerDashboardPage,
   PartnerOrderDetailPage,
   PartnerPlansPage,
+  PartnerProfilePage,
   PartnerOrdersPage,
 } from '../pages/partner/PartnerPages'
 import { DiscoveryPage } from '../pages/public/DiscoveryPage'
@@ -63,6 +64,9 @@ export const router = createBrowserRouter([
           { path: 'book/:providerId', element: <BookingCreatePage /> },
           { path: 'orders', element: <OrdersPage /> },
           { path: 'orders/:id', element: <OrderDetailPage /> },
+          { path: 'orders/:id/dispute', element: <DisputeCreatePage /> },
+          { path: 'disputes', element: <DisputesPage /> },
+          { path: 'disputes/:disputeId', element: <DisputeDetailPage /> },
           { path: 'profile', element: <ProfilePage /> },
         ],
       },
@@ -95,6 +99,7 @@ export const router = createBrowserRouter([
           { path: 'partner/orders/:id', element: <RequireActor allow={['freelancer']}><PartnerOrderDetailPage /></RequireActor> },
           { path: 'partner/orders', element: <RequireActor allow={['freelancer']}><PartnerOrdersPage /></RequireActor> },
           { path: 'partner/plans', element: <PartnerPlansPage /> },
+          { path: 'partner/profile', element: <RequireActor allow={['freelancer']}><PartnerProfilePage /></RequireActor> },
           { path: 'partners/register/kyc', element: <RequireActor allow={['freelancer']}><PartnerRegistrationPage /></RequireActor> },
         ],
       },
@@ -111,7 +116,9 @@ export const router = createBrowserRouter([
           { path: 'admin/companies/:providerId', element: <AdminCompanyDetailPage /> },
           { path: 'admin/kyc', element: <AdminKycPage /> },
           { path: 'admin/kyc/:providerId', element: <AdminKycDetailPage /> },
+          { path: 'admin/plans', element: <AdminPlansPage /> },
           { path: 'admin/disputes', element: <AdminDisputesPage /> },
+          { path: 'admin/disputes/:disputeId', element: <AdminDisputeDetailPage /> },
         ],
       },
       {

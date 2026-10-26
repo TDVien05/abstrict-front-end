@@ -22,4 +22,12 @@ export default tseslint.config(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
+  {
+    // Test harness: JSON phản hồi từ API thật không có kiểu cố định, và fixture Playwright dùng `async ({}, testInfo)`.
+    files: ['e2e/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      'no-empty-pattern': 'off',
+    },
+  },
 )
