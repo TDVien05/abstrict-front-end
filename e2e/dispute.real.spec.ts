@@ -28,7 +28,6 @@ let otherToken = ''
 let freelancerToken = ''
 let adminToken = ''
 let disputeId = ''
-let evidenceId = ''
 let bookingNumber = ''
 let adminLoginResult = 'chưa thử'
 let rateLimited = 0
@@ -190,7 +189,6 @@ test.describe('Khiếu nại của customer và quyết định của admin (bac
     const up = await uploadEvidence(customerToken, disputeId, { name: 'bep.png', mimeType: 'image/png', buffer: PNG }, { description: 'Ảnh bếp chưa sạch' })
     recordOneOf('tải ảnh bằng chứng hợp lệ', ['200', '201'], up)
     const evidence = ((await myDispute()).evidence ?? []) as { id: string; description: string | null; contentUrl: string }[]
-    evidenceId = up.json?.id ?? evidence.at(-1)?.id ?? ''
     check('ảnh bằng chứng có trong khiếu nại kèm mô tả', 'Ảnh bếp chưa sạch', String(evidence.at(-1)?.description), evidence.at(-1)?.description === 'Ảnh bếp chưa sạch')
     const content = await getUrl(customerToken, evidence.at(-1)!.contentUrl)
     record('customer xem nội dung ảnh bằng chứng', '200', content)

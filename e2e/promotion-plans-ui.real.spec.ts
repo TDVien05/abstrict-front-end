@@ -1,9 +1,8 @@
 import { execFileSync } from 'node:child_process'
-import { test, expect, request as pwRequest, type Browser, type Page } from '@playwright/test'
+import { test, expect, type Browser, type Page } from '@playwright/test'
 
 // Giao diện gói hiển thị trên backend thật: admin tạo gói bằng trình nhập quyền lợi mới → freelancer thấy thẻ gói,
 // mua gói có phí, thanh toán thử, thấy gói đang hiệu lực; mua gói miễn phí nối tiếp. Dữ liệu tạo ra được xóa ở cuối.
-const API = process.env.E2E_API_URL ?? 'http://127.0.0.1:8080/api/v1'
 const FREELANCER = { phone: '0910000004', password: process.env.E2E_FREELANCER_PASSWORD ?? 'Freelancer-dev-2026' }
 const ADMIN = { phone: process.env.E2E_ADMIN_PHONE ?? '0900000001', password: process.env.E2E_ADMIN_PASSWORD ?? '' }
 const DB = process.env.E2E_DB_CONTAINER ?? 'abstrict-postgres'
@@ -38,7 +37,6 @@ test.afterAll(() => {
 
 test('admin tạo gói → freelancer mua, thanh toán thử, thấy gói hiệu lực', async ({ browser }) => {
   test.setTimeout(180_000)
-  await pwRequest.newContext() // đảm bảo fixture request sẵn sàng; API không dùng trực tiếp ở đây
 
   // Admin tạo hai gói bằng giao diện
   const admin = await openAs(browser, ADMIN, '/login')

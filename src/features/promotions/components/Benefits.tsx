@@ -1,8 +1,6 @@
 import { Check, Plus, X } from 'lucide-react'
 import { useRef } from 'react'
-
-export const MAX_BENEFITS = 10
-export const MAX_BENEFIT_LENGTH = 200
+import { MAX_BENEFITS, MAX_BENEFIT_LENGTH } from '../benefits'
 
 // Hiển thị quyền lợi của gói: mỗi mục một dấu tích để quét nhanh.
 export function BenefitList({ benefits, className = '' }: { benefits: string[]; className?: string }) {
@@ -69,8 +67,4 @@ export function BenefitsEditor({ onChange, value }: { onChange: (next: string[])
       <button className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-charcoal disabled:cursor-not-allowed disabled:text-brand-muted" disabled={!canAdd} onClick={() => add(items.length - 1)} type="button"><Plus className="size-4" />Thêm quyền lợi</button>
     </fieldset>
   )
-}
-
-export function cleanBenefits(value: string[]) {
-  return value.map((item) => item.trim()).filter(Boolean)
 }

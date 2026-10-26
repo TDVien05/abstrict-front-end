@@ -12,7 +12,8 @@ import {
 } from '../../features/promotions/api/plans'
 import { formatVnd } from '../../shared/lib/format-currency'
 import { Button } from '../../shared/ui/Button'
-import { BenefitList, BenefitsEditor, cleanBenefits } from '../../features/promotions/components/Benefits'
+import { cleanBenefits } from '../../features/promotions/benefits'
+import { BenefitList, BenefitsEditor } from '../../features/promotions/components/Benefits'
 import { Select } from '../../shared/ui/Select'
 
 const inputClass = 'mt-2 w-full rounded-xl border border-brand-border bg-white px-3 py-2 text-sm font-normal outline-none focus:border-brand-charcoal'
