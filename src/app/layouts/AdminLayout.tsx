@@ -1,4 +1,4 @@
-import { Building2, LayoutDashboard, Scale, ShieldCheck } from 'lucide-react'
+import { Building2, LayoutDashboard, Scale, ShieldCheck, Sparkles } from 'lucide-react'
 import { SidebarShell, type SidebarItem } from '../components/SidebarShell'
 
 const items: SidebarItem[] = [
@@ -6,6 +6,7 @@ const items: SidebarItem[] = [
   { label: 'Duyệt KYC', to: '/admin/kyc', icon: ShieldCheck },
   { label: 'Duyệt doanh nghiệp', to: '/admin/approvals', icon: Building2 },
   { label: 'Khiếu nại', to: '/admin/disputes', icon: Scale },
+  { label: 'Gói hiển thị', to: '/admin/plans', icon: Sparkles },
 ]
 
 export function AdminLayout() {

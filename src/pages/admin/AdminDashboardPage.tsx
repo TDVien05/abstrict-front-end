@@ -6,6 +6,7 @@ import type { KycStatus } from '../../entities/kyc'
 import { useAdminCompanies } from '../../features/admin/api/companies'
 import { useAdminKycList } from '../../features/admin/api/kyc'
 import { vnDateTime } from '../../shared/lib/vn-time'
+import { AdminPlanReport } from './AdminPlanReport'
 
 const DAYS = 7
 const BLUE = '#2563eb'
@@ -206,6 +207,8 @@ export function AdminDashboardPage() {
           <Bars items={[{ color: BLUE, label: 'Chờ duyệt', value: totals.company.queue }, { color: GREEN, label: 'Đã duyệt', value: totals.company.approved }, { color: '#f97316', label: 'Bị từ chối', value: totals.company.rejected }, { color: '#a78bfa', label: 'Đang soạn', value: totals.company.draft }]} />
         </Card>
       </div>
+
+      <AdminPlanReport />
     </div>
   )
 }

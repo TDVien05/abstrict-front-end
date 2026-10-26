@@ -31,6 +31,7 @@ const navByActor: Record<Actor | 'public', { label: string; to: string }[]> = {
     { label: 'Tổng quan', to: '/partner/dashboard' },
     { label: 'Đơn đặt lịch', to: '/partner/orders' },
     { label: 'Lịch làm việc', to: '/partner/schedule' },
+    { label: 'Hồ sơ công khai', to: '/partner/profile' },
     { label: 'Gói hiển thị', to: '/partner/plans' },
   ],
   company: [
@@ -42,6 +43,7 @@ const navByActor: Record<Actor | 'public', { label: string; to: string }[]> = {
     { label: 'Duyệt KYC', to: '/admin/kyc' },
     { label: 'Duyệt doanh nghiệp', to: '/admin/approvals' },
     { label: 'Khiếu nại', to: '/admin/disputes' },
+    { label: 'Gói hiển thị', to: '/admin/plans' },
   ],
 }
 

@@ -266,11 +266,3 @@ export function PartnerDashboardPage() {
     </div>
   )
 }
-
-export function PartnerPlansPage() {
-  return (
-    <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-      <p className="text-brand-muted">Gói hiển thị sẽ sớm ra mắt.</p>
-    </div>
-  )
-}

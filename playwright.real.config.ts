@@ -22,7 +22,7 @@ export default defineConfig({
     timeout: 60_000,
     env: {
       ...(process.env as Record<string, string>),
-      VITE_API_PROXY_TARGET: 'http://localhost:8080',
+      VITE_API_PROXY_TARGET: process.env.E2E_PROXY_TARGET ?? 'http://127.0.0.1:8080',
       VITE_API_BASE_URL: '/api/v1',
     },
   },
