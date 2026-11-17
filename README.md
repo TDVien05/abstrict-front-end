@@ -1,12 +1,88 @@
-# Abstrict frontend
+# ABSTRICT — Frontend
+
+Web app for a platform to find and book hourly home-help services in Ho Chi Minh City, for customers, freelancer/company partners and admins.
+
+- **Live demo:** https://abstrict.vientruong.site
+- **API:** https://abstrict.api.vientruong.site (repo: https://github.com/TDVien05/abstrict-back-end)
+
+## Tech stack
+
+| Area | Technology |
+| --- | --- |
+| Framework | React 19, TypeScript 5.9, Vite 7 |
+| UI | Tailwind CSS 4, lucide-react, Nunito Sans font |
+| Routing / data | React Router 7, TanStack Query 5 |
+| Forms / validation | React Hook Form + Zod 4 |
+| QR | `qrcode.react` (display), `jsqr` (check-in scanning) |
+| Testing | Vitest + Testing Library (unit), Playwright (e2e) |
+| Quality | ESLint 9, `tsc -b` |
+| Deployment | Vercel via GitHub Actions |
+
+## Testing on the live demo
+
+1. Open https://abstrict.vientruong.site.
+2. Log in with a phone number and password, or register a new account (OTP).
+3. Try the flow for each role: customer books and pays the deposit (sandbox) → freelancer confirms, scans the QR, uploads photos → customer accepts, rates or disputes → admin resolves.
+
+### Test accounts
+
+| Role | Phone number | Description |
+| --- | --- | --- |
+| Admin | `0900000001` | Approves KYC/companies, plans, disputes |
+| Customer | `0920000001` | Test customer (District 1) |
+| Customer | `0920000002` | Second test customer (outside party, for permission tests) |
+| Approved freelancer | `0910000001` – `0910000005` | Have availability and can be booked; `0910000001` = Nguyễn Thị Lan |
+| Pending freelancer | `0910000006`, `0910000007` | For the admin to try KYC approval |
+| Draft freelancer | `0910000008` | Profile not finished |
+
+> **Password:** `<fill in the current demo password>` — ask the repo owner. Do not commit real passwords.
+
+## Project structure
+
+```text
+src/
+  app/        # router, layouts, guards (RequireActor), providers, error boundary
+  entities/   # shared domain types (auth, booking, company, kyc)
+  features/   # business logic: auth, discovery, booking, availability, customer,
+              # partner, promotions, payments, ratings, disputes, profiles, catalog, admin, landing
+  pages/      # screens: public, customer, partner, admin, payments
+  shared/     # api client, ui, lib, styles, assets
+e2e/          # Playwright: *.spec.ts (mocked) and *.real.spec.ts (against a real backend)
+docs/         # design/API notes
+```
+
+More docs: `FRONTEND_ARCHITECTURE.md`, `DESIGN_SYSTEM.md`, `PROJECT_IDEA.md`.
 
 ## Local development
 
+Requirements: Node.js 20+, npm, and a running backend (see the backend repo README).
+
 ```sh
 npm ci
-cp .env.example .env.local
-npm run dev
+cp .env.example .env.local     # PowerShell: Copy-Item .env.example .env.local
+npm run dev                    # http://localhost:5173
 ```
+
+Environment variables (`.env.example`):
+
+| Variable | Meaning |
+| --- | --- |
+| `VITE_API_BASE_URL` | API path used by the browser; keep `/api/v1` |
+| `VITE_API_PROXY_TARGET` | Backend the Vite dev proxy forwards to: `http://localhost:8080` (Docker Compose) or `http://localhost:5191` (`dotnet run`); set to `https://abstrict.api.vientruong.site` to use the hosted API |
+| `VITE_DEMO_CUSTOMER` / `VITE_DEMO_PARTNER` | Dev only: preview protected routes without logging in |
+
+### Common commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the dev server |
+| `npm run build` | Typecheck + build into `dist/` |
+| `npm run preview` | Preview the build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | Type check |
+| `npm test` | Unit tests (Vitest) |
+| `npx playwright test` | e2e with mocked data |
+| `npx playwright test -c playwright.real.config.ts` | e2e against a real backend; accounts via `E2E_*` variables (e.g. `E2E_CUSTOMER_PHONE`, `E2E_CUSTOMER_PASSWORD`, `E2E_FREELANCER_PHONE`, `E2E_ADMIN_PASSWORD`) |
 
 ## CI/CD
 
